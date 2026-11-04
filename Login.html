@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExamHub - Login</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6fb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+}
+.box {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 320px;
+  box-shadow: 0 3px 12px #ddd;
+}
+input, button {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  box-sizing: border-box;
+}
+button {
+  background: #2563eb;
+  color: white;
+  border: 0;
+  border-radius: 6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h2>ExamHub Login</h2>
+
+<form id="loginForm">
+<input id="email" type="email" placeholder="Email" required>
+
+<input id="password" type="password"
+placeholder="Password" required>
+
+<button type="submit">Login</button>
+</form>
+
+<p id="message"></p>
+
+<p>New User? <a href="signup.html">Create Account</a></p>
+
+<a href="index.html">Back to Home</a>
+</div>
+
+<script>
+const client = window.supabase.createClient(
+  "https://aeflfnlpkbnlhbkghwav.supabase.co",
+  "sb_publishable_ftFxJpr44cFv9ywfRX6Wbw_YgUtCNJP"
+);
+
+document.getElementById("loginForm")
+.addEventListener("submit", async function(e) {
+
+  e.preventDefault();
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const message = document.getElementById("message");
+
+  message.textContent = "Logging in...";
+
+  const { data, error } = await client.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
+
+  if (error) {
+    message.textContent = error.message;
+  } else {
+    message.textContent = "Login Successful!";
+    window.location.href = "index.html";
+  }
+
+});
+</script>
+
+</body>
+</html>
