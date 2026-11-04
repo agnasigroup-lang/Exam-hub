@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExamHub - Signup</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body {
+  font-family: Arial;
+  background: #f4f6fb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+}
+.box {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 320px;
+  box-shadow: 0 3px 12px #ddd;
+}
+input, button {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  box-sizing: border-box;
+}
+button {
+  background: #2563eb;
+  color: white;
+  border: 0;
+  border-radius: 6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h2>ExamHub Signup</h2>
+
+<form id="signupForm">
+<input id="name" placeholder="Full Name" required>
+<input id="email" type="email" placeholder="Email" required>
+<input id="password" type="password" placeholder="Password" minlength="8" required>
+<button type="submit">Create Account</button>
+</form>
+
+<p id="message"></p>
+<p>Already have an account? <a href="login.html">Login</a></p>
+</div>
+
+<script>
+const client = window.supabase.createClient(
+  "https://aeflfnlpkbnlhbkghwav.supabase.co",
+  "sb_publishable_ftFxJpr44cFv9ywfRX6Wbw_YgUtCNJP"
+);
+
+document.getElementById("signupForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const message = document.getElementById("message");
+  message.textContent = "Creating account...";
+
+  const { data, error } = await client.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { full_name: name },
+      emailRedirectTo: new URL("index.html", window.location.href).href
+    }
+  });
+
+  if (error) {
+    message.textContent = error.message;
+  } else if (data.session) {
+    message.textContent = "Account created successfully!";
+    window.location.href = "index.html";
+  } else {
+    message.textContent = "Account created! Please check your email to verify your account.";
+  }
+});
+</script>
+
+</body>
+</html>
