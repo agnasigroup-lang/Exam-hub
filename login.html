@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,51 +7,20 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-body {
-font-family: Arial;
-background: #f4f6fb;
-display: flex;
-justify-content: center;
-align-items: center;
-min-height: 90vh;
-}
-
-.box {
-background: white;
-padding: 25px;
-border-radius: 12px;
-width: 320px;
-}
-
-input, button {
-width: 100%;
-padding: 12px;
-margin: 10px 0;
-box-sizing: border-box;
-}
-
-button {
-background: #2563eb;
-color: white;
-border: none;
-border-radius: 6px;
-}
-</style>
 </head>
-
 <body>
 
-<div class="box">
 <h2>ExamHub Login</h2>
 
 <form id="loginForm">
 
-<input id="email" type="email"
-placeholder="Email" required>
+<input id="email" type="email" placeholder="Email" required>
 
-<input id="password" type="password"
-placeholder="Password" required>
+<br><br>
+
+<input id="password" type="password" placeholder="Password" required>
+
+<br><br>
 
 <button type="submit">Login</button>
 
@@ -61,47 +30,40 @@ placeholder="Password" required>
 
 <a href="signup.html">Create Account</a>
 <br><br>
-<a href="index.html">Back to Home</a>
-
-</div>
+<a href="index.html">Home</a>
 
 <script>
+
 const client = window.supabase.createClient(
 "https://aeflfnlpkbnlhbkghwav.supabase.co",
 "sb_publishable_ftFxJpr44cFv9ywfRX6Wbw_YgUtCNJP"
 );
 
-document.getElementById("loginForm")
-.addEventListener("submit", async function(e) {
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
 
 e.preventDefault();
 
 const email = document.getElementById("email").value;
 const password = document.getElementById("password").value;
+
 const message = document.getElementById("message");
 
 message.textContent = "Please wait...";
 
-try {
 const {data, error} = await client.auth.signInWithPassword({
-email,
-password
+email: email,
+password: password
 });
 
 if(error) {
 message.textContent = error.message;
-return;
-}
-
+} else {
 message.textContent = "Login Successful!";
-
 window.location.href = "index.html";
-
-} catch(error) {
-message.textContent = error.message;
 }
 
 });
+
 </script>
 
 </body>
