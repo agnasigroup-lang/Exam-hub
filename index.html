@@ -2,149 +2,60 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>ExamHub - Online Test</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ExamHub</title>
 <style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f6fb;
-  color: #172554;
-}
-
-header {
-  background: white;
-  padding: 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 8px #ddd;
-}
-
-.logo {
-  font-size: 25px;
-  font-weight: bold;
-  color: #2563eb;
-}
-
-nav a {
-  margin-left: 12px;
-  text-decoration: none;
-  color: #172554;
-}
-
-.hero {
-  padding: 45px 20px;
-  text-align: center;
-  background: #2563eb;
-  color: white;
-}
-
-.container {
-  padding: 20px;
-  max-width: 900px;
-  margin: auto;
-}
-
-.card {
-  background: white;
-  padding: 20px;
-  margin: 15px 0;
-  border-radius: 12px;
-  box-shadow: 0 3px 12px #ddd;
-}
-
-button {
-  background: #2563eb;
-  color: white;
-  border: none;
-  padding: 12px 22px;
-  border-radius: 7px;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-footer {
-  text-align: center;
-  padding: 20px;
-  background: #172554;
-  color: white;
-}
+body{font-family:Arial;background:#f4f6fb;margin:0;color:#172554}
+header{background:white;padding:20px;display:flex;justify-content:space-between}
+a{color:#2563eb;text-decoration:none;margin:8px}
+.hero{text-align:center;background:#2563eb;color:white;padding:40px 15px}
+.container{max-width:800px;margin:auto;padding:20px}
+.card{background:white;padding:20px;margin:15px 0;border-radius:12px}
+button{background:#2563eb;color:white;border:0;padding:12px 22px;border-radius:7px}
 </style>
 </head>
-
 <body>
 
 <header>
-  <div class="logo">ExamHub</div>
-
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="Login.html">Login</a>
-    <a href="signup.html">Signup</a>
-  </nav>
+<b>ExamHub</b>
+<nav>
+<a href="./index.html">Home</a>
+<a href="./login.html">Login</a>
+<a href="./signup.html">Signup</a>
+</nav>
 </header>
 
-<section class="hero">
-  <h1>Welcome to ExamHub</h1>
-  <p>अपनी परीक्षा की तैयारी करें और अपना Result देखें।</p>
-</section>
+<div class="hero">
+<h1>Welcome to ExamHub</h1>
+<p>अपनी परीक्षा की तैयारी करें।</p>
+</div>
 
 <div class="container">
 
-<h2>Available Exams</h2>
-
 <div class="card">
-  <h3>General Knowledge</h3>
-  <p>10 Questions | 10 Minutes</p>
-  <p>Fee: Free</p>
-  <button onclick="location.href='test.html'">
-    Start Test
-  </button>
+<h3>General Knowledge</h3>
+<p>10 Questions | Free</p>
+<a href="./test.html?exam=gk">
+<button>Start Test</button>
+</a>
 </div>
 
 <div class="card">
-  <h3>Mathematics Mock Test</h3>
-  <p>20 Questions | 20 Minutes</p>
-  <p>Fee: ₹49</p>
-  <button onclick="location.href='paid-test.html?exam=math'">
-    View Test
-  </button>
+<h3>Mathematics Mock Test</h3>
+<p>20 Questions | ₹49</p>
+<button onclick="alert('Payment Gateway अभी Connect नहीं है।')">
+View Test
+</button>
 </div>
 
 <div class="card">
-  <h3>Science Mock Test</h3>
-  <p>25 Questions | 30 Minutes</p>
-  <p>Fee: ₹29</p>
-  <button onclick="location.href='paid-test.html?exam=science'">
-    View Test
-  </button>
+<h3>Science Mock Test</h3>
+<p>25 Questions | ₹29</p>
+<button onclick="alert('Payment Gateway अभी Connect नहीं है।')">
+View Test
+</button>
 </div>
 
 </div>
-
-<footer>
-  © 2026 ExamHub. All Rights Reserved.
-</footer>
-
-<script>
-const SUPABASE_URL = "https://aeflfnlpkbnlhbkghwav.supabase.co";
-
-const SUPABASE_KEY = "YOUR_PUBLISHABLE_KEY";
-
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-</script>
-
 </body>
 </html>
