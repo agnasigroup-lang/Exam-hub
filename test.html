@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ExamHub Test</title>
+<style>
+body{font-family:Arial;background:#f4f6fb;padding:20px}
+.box{background:white;padding:20px;border-radius:12px;max-width:500px;margin:auto}
+button{background:#2563eb;color:white;border:0;padding:12px;margin-top:15px;border-radius:6px}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h2>General Knowledge Test</h2>
+<p id="timer">Time: 10:00</p>
+<div id="question"></div>
+<div id="options"></div>
+<button onclick="nextQuestion()">Next Question</button>
+<p id="result"></p>
+<a href="./index.html">Back Home</a>
+</div>
+
+<script>
+const questions=[
+{q:"भारत की राजधानी क्या है?",o:["मुंबई","दिल्ली","जयपुर","लखनऊ"],a:1},
+{q:"भारत का राष्ट्रीय पशु कौन है?",o:["शेर","हाथी","बाघ","घोड़ा"],a:2},
+{q:"भारत का राष्ट्रीय पक्षी कौन है?",o:["मोर","तोता","कबूतर","हंस"],a:0}
+];
+
+let current=0,score=0,selected=-1,finished=false;
+
+function showQuestion(){
+selected=-1;
+document.getElementById("question").textContent=
+questions[current].q;
+
+document.getElementById("options").innerHTML=
+questions[current].o.map((v,i)=>
+`<p><label><input type="radio" name="answer" value="${i}"> ${v}</label></p>`
+).join("");
+}
+
+function nextQuestion(){
+if(finished)return;
+
+const choice=document.querySelector('input[name="answer"]:checked');
+
+if(!choice){
+alert("कृपया एक विकल्प चुनें");
+return;
+}
+
+if(Number(choice.value)===questions[current].a)score++;
+
+current++;
+
+if(current<questions.length){
+showQuestion();
+}else{
+finished=true;
+document.getElementById("question").textContent="Test Completed!";
+document.getElementById("options").innerHTML="";
+document.getElementById("result").textContent=
+"Your Score: "+score+"/"+questions.length;
+}
+}
+
+showQuestion();
+
+let seconds=600;
+setInterval(()=>{
+if(finished)return;
+seconds--;
+if(seconds<0){
+finished=true;
+document.getElementById("question").textContent="Time Up!";
+document.getElementById("options").innerHTML="";
+document.getElementById("result").textContent=
+"Your Score: "+score+"/"+questions.length;
+return;
+}
+document.getElementById("timer").textContent=
+"Time: "+Math.floor(seconds/60)+":"+String(seconds%60).padStart(2,"0");
+},1000);
+</script>
+
+</body>
+</html>
