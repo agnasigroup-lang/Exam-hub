@@ -649,7 +649,7 @@ async function editQuestion(id) {
         .from("questions")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
     if (error) {
         showError(error);
