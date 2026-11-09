@@ -219,7 +219,9 @@ label {
         <button onclick="saveQuestion()">Save Question</button>
         <button class="edit" onclick="clearQuestionForm()">Clear</button>
     </div>
-
+<button type="button" onclick="clearQuestionForm()">
+    + Add New Question
+</button>
 
     <!-- QUESTION LIST -->
 
@@ -307,10 +309,6 @@ async function initAdmin() {
 
 
 // SAVE EXAM
-
-<button type="button" onclick="clearQuestionForm()">
-    + Add New Question
-</button>
     async function saveExam() {
 
     try {
