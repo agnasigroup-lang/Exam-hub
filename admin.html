@@ -268,27 +268,24 @@ async function initAdmin() {
             throw new Error("config.js connection not found.");
         }
 
-        const { data: { user }, error } =
-            await supabaseClient.auth.getUser();
-
-        if (error) throw error;
-
-        if (!user) {
-            showStatus("Please login first.");
-            setTimeout(() => {
-                location.href = "./login.html";
-            }, 1500);
-            return;
-        }
-
-        currentUser = user;
-
         const { data: profile, error: profileError } =
-            await supabaseClient
-                .from("profiles")
-                .select("role")
-                .eq("id", user.id)
-                .single();
+    await supabaseClient
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+
+if (profileError) throw profileError;
+
+if (!profile || profile.role !== "admin") {
+    showStatus("Access Denied: Admin permission required.");
+    return;
+}
+
+showStatus("Admin Access Verified.");
+$("dashboard").classList.remove("hidden");
+
+await loadExams();
 
         if (profileError) throw profileError;
 
