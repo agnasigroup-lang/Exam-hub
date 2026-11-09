@@ -717,10 +717,16 @@ function clearQuestionForm() {
 // LOGOUT
 
 async function logout() {
+    try {
+        const { error } = await supabaseClient.auth.signOut();
 
-    await supabaseClient.auth.signOut();
+        if (error) throw error;
 
-    location.href = "./login.html";
+        window.location.replace("./login.html");
+
+    } catch (error) {
+        alert("Logout Error: " + error.message);
+    }
 }
 
 
