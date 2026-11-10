@@ -162,7 +162,7 @@ async function initTest() {
         const { data: exam, error: examError } =
             await supabaseClient
                 .from("exams")
-                .select("id,title,is_published")
+                .select("id,title,is_published,duration_minutes")
                 .eq("id", examId)
                 .eq("is_published", true)
                 .maybeSingle();
