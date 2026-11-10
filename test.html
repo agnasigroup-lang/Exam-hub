@@ -1,89 +1,366 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ExamHub Test</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExamHub - Online Test</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./config.js"></script>
+
 <style>
-body{font-family:Arial;background:#f4f6fb;padding:20px}
-.box{background:white;padding:20px;border-radius:12px;max-width:500px;margin:auto}
-button{background:#2563eb;color:white;border:0;padding:12px;margin-top:15px;border-radius:6px}
+body {
+    font-family: Arial, sans-serif;
+    background: #f2f5fa;
+    margin: 0;
+    padding: 15px;
+}
+.container {
+    max-width: 750px;
+    margin: 20px auto;
+    background: white;
+    padding: 22px;
+    border-radius: 12px;
+}
+h2 { color: #183b70; }
+.top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 12px;
+}
+#timer {
+    color: #d62828;
+    font-weight: bold;
+    font-size: 20px;
+}
+.question {
+    font-size: 19px;
+    margin: 25px 0;
+    font-weight: bold;
+}
+.option {
+    display: block;
+    background: #f3f6fb;
+    padding: 13px;
+    margin: 10px 0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.option input {
+    margin-right: 10px;
+}
+button {
+    padding: 12px 18px;
+    border: none;
+    border-radius: 7px;
+    background: #1769d2;
+    color: white;
+    cursor: pointer;
+    margin: 5px;
+}
+button:disabled {
+    background: #999;
+    cursor: not-allowed;
+}
+.navigation {
+    margin-top: 25px;
+}
+#result {
+    display: none;
+    background: #e9f8ee;
+    padding: 18px;
+    border-radius: 10px;
+}
+#error {
+    color: red;
+    white-space: pre-wrap;
+}
 </style>
 </head>
+
 <body>
 
-<div class="box">
-<h2>General Knowledge Test</h2>
-<p id="timer">Time: 10:00</p>
-<div id="question"></div>
-<div id="options"></div>
-<button onclick="nextQuestion()">Next Question</button>
-<p id="result"></p>
-<a href="./index.html">Back Home</a>
+<div class="container">
+
+    <h2 id="examTitle">Loading Exam...</h2>
+
+    <div class="top">
+        <span id="questionCount"></span>
+        <span id="timer">30:00</span>
+    </div>
+
+    <div id="testArea" style="display:none">
+
+        <div class="question" id="questionText"></div>
+
+        <div id="options"></div>
+
+        <div class="navigation">
+            <button id="previousBtn" onclick="previousQuestion()">
+                Previous
+            </button>
+
+            <button onclick="nextQuestion()">
+                Next
+            </button>
+
+            <button onclick="skipQuestion()">
+                Skip
+            </button>
+
+            <button id="submitBtn" onclick="submitTest()"
+                style="background:#198754">
+                Submit Test
+            </button>
+        </div>
+
+    </div>
+
+    <div id="result">
+        <h2>Test Completed!</h2>
+        <p id="resultDetails"></p>
+        <button onclick="location.href='./dashboard.html'">
+            Go to Dashboard
+        </button>
+    </div>
+
+    <p id="error"></p>
+
 </div>
 
 <script>
-const questions=[
-{q:"भारत की राजधानी क्या है?",o:["मुंबई","दिल्ली","जयपुर","लखनऊ"],a:1},
-{q:"भारत का राष्ट्रीय पशु कौन है?",o:["शेर","हाथी","बाघ","घोड़ा"],a:2},
-{q:"भारत का राष्ट्रीय पक्षी कौन है?",o:["मोर","तोता","कबूतर","हंस"],a:0}
-];
 
-let current=0,score=0,selected=-1,finished=false;
+let examId = new URLSearchParams(location.search).get("exam");
+let questions = [];
+let answers = {};
+let currentIndex = 0;
+let timeLeft = 30 * 60;
+let timerInterval = null;
+let submitting = false;
 
-function showQuestion(){
-selected=-1;
-document.getElementById("question").textContent=
-questions[current].q;
+async function initTest() {
 
-document.getElementById("options").innerHTML=
-questions[current].o.map((v,i)=>
-`<p><label><input type="radio" name="answer" value="${i}"> ${v}</label></p>`
-).join("");
+    try {
+
+        if (!examId || !/^\d+$/.test(examId)) {
+            throw new Error("Invalid Exam ID");
+        }
+
+        const { data: sessionData, error: sessionError } =
+            await supabaseClient.auth.getSession();
+
+        if (sessionError) throw sessionError;
+
+        if (!sessionData.session) {
+            location.href = "./login.html";
+            return;
+        }
+
+        const { data: exam, error: examError } =
+            await supabaseClient
+                .from("exams")
+                .select("id,title,is_published")
+                .eq("id", examId)
+                .eq("is_published", true)
+                .maybeSingle();
+
+        if (examError) throw examError;
+
+        if (!exam) {
+            throw new Error("Exam not found or not published.");
+        }
+
+        document.getElementById("examTitle").textContent =
+            exam.title;
+
+        const { data, error } = await supabaseClient.rpc(
+            "get_exam_questions",
+            { p_exam_id: Number(examId) }
+        );
+
+        if (error) throw error;
+
+        questions = data || [];
+
+        if (questions.length === 0) {
+            throw new Error("Is Exam mein abhi koi question nahi hai.");
+        }
+
+        document.getElementById("testArea").style.display = "block";
+
+        showQuestion();
+        startTimer();
+
+    } catch (error) {
+        showError(error.message);
+    }
 }
 
-function nextQuestion(){
-if(finished)return;
+function showQuestion() {
 
-const choice=document.querySelector('input[name="answer"]:checked');
+    const q = questions[currentIndex];
 
-if(!choice){
-alert("कृपया एक विकल्प चुनें");
-return;
+    document.getElementById("questionCount").textContent =
+        "Question " + (currentIndex + 1) +
+        " of " + questions.length;
+
+    document.getElementById("questionText").textContent =
+        q.question_text;
+
+    const options = document.getElementById("options");
+    options.innerHTML = "";
+
+    ["A", "B", "C", "D"].forEach(letter => {
+
+        const value = q["option_" + letter.toLowerCase()];
+
+        const label = document.createElement("label");
+        label.className = "option";
+
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "answer";
+        radio.value = letter;
+        radio.checked = answers[q.id] === letter;
+
+        radio.addEventListener("change", () => {
+            answers[q.id] = letter;
+        });
+
+        label.appendChild(radio);
+        label.appendChild(
+            document.createTextNode(letter + ". " + value)
+        );
+
+        options.appendChild(label);
+
+    });
+
+    document.getElementById("previousBtn").disabled =
+        currentIndex === 0;
+
 }
 
-if(Number(choice.value)===questions[current].a)score++;
+function nextQuestion() {
 
-current++;
+    if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        showQuestion();
+    }
 
-if(current<questions.length){
-showQuestion();
-}else{
-finished=true;
-document.getElementById("question").textContent="Test Completed!";
-document.getElementById("options").innerHTML="";
-document.getElementById("result").textContent=
-"Your Score: "+score+"/"+questions.length;
-}
 }
 
-showQuestion();
+function previousQuestion() {
 
-let seconds=600;
-setInterval(()=>{
-if(finished)return;
-seconds--;
-if(seconds<0){
-finished=true;
-document.getElementById("question").textContent="Time Up!";
-document.getElementById("options").innerHTML="";
-document.getElementById("result").textContent=
-"Your Score: "+score+"/"+questions.length;
-return;
+    if (currentIndex > 0) {
+        currentIndex--;
+        showQuestion();
+    }
+
 }
-document.getElementById("timer").textContent=
-"Time: "+Math.floor(seconds/60)+":"+String(seconds%60).padStart(2,"0");
-},1000);
+
+function skipQuestion() {
+
+    if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        showQuestion();
+    }
+
+}
+
+function startTimer() {
+
+    updateTimer();
+
+    timerInterval = setInterval(() => {
+
+        timeLeft--;
+
+        updateTimer();
+
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            submitTest(true);
+        }
+
+    }, 1000);
+
+}
+
+function updateTimer() {
+
+    let minutes = Math.floor(timeLeft / 60);
+    let seconds = timeLeft % 60;
+
+    document.getElementById("timer").textContent =
+        String(minutes).padStart(2, "0") + ":" +
+        String(seconds).padStart(2, "0");
+
+}
+
+async function submitTest(autoSubmit = false) {
+
+    if (submitting) return;
+
+    if (!autoSubmit &&
+        !confirm("Kya aap Test Submit karna chahte hain?")) {
+        return;
+    }
+
+    submitting = true;
+
+    clearInterval(timerInterval);
+
+    document.getElementById("submitBtn").disabled = true;
+
+    try {
+
+        const { data, error } = await supabaseClient.rpc(
+            "submit_exam",
+            {
+                p_exam_id: Number(examId),
+                p_answers: answers
+            }
+        );
+
+        if (error) throw error;
+
+        const result = data[0];
+
+        document.getElementById("testArea").style.display = "none";
+        document.getElementById("result").style.display = "block";
+
+        document.getElementById("resultDetails").innerHTML = `
+            <b>Total Questions:</b> ${result.total_questions}<br><br>
+            <b>Attempted:</b> ${result.attempted_questions}<br><br>
+            <b>Correct Answers:</b> ${result.correct_answers}<br><br>
+            <b>Wrong Answers:</b> ${result.wrong_answers}<br><br>
+            <b>Score:</b> ${result.score}
+        `;
+
+        document.getElementById("examTitle").textContent =
+            "Your Result";
+
+    } catch (error) {
+
+        submitting = false;
+        document.getElementById("submitBtn").disabled = false;
+        showError(error.message);
+
+    }
+
+}
+
+function showError(message) {
+    document.getElementById("error").textContent =
+        "Error: " + message;
+}
+
+initTest();
+
 </script>
 
 </body>
