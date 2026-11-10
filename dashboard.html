@@ -9,55 +9,84 @@
 <script src="./config.js"></script>
 
 <style>
-*{box-sizing:border-box}
-body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:#f1f5f9;
-    color:#1e293b;
+body {
+    font-family: Arial, sans-serif;
+    background: #f2f5fa;
+    margin: 0;
+    padding: 15px;
+    color: #222;
 }
-header{
-    background:#172554;
-    color:white;
-    padding:18px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    flex-wrap:wrap;
+
+header {
+    background: #173e78;
+    color: white;
+    padding: 18px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
 }
-.container{
-    max-width:1100px;
-    margin:25px auto;
-    padding:15px;
+
+.container {
+    max-width: 1000px;
+    margin: 20px auto;
 }
-h2{margin-top:0}
-.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:18px;
+
+.section {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 22px;
 }
-.card{
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 2px 8px #0001;
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 15px;
 }
-button{
-    background:#2563eb;
-    color:white;
-    border:0;
-    padding:12px 18px;
-    border-radius:6px;
-    cursor:pointer;
+
+.card {
+    border: 1px solid #ddd;
+    padding: 16px;
+    border-radius: 9px;
 }
-.logout{background:#dc2626}
-.fee{font-weight:bold;color:#15803d}
-#status{
-    background:white;
-    padding:15px;
-    border-radius:8px;
-    margin-bottom:20px;
-    overflow-wrap:anywhere;
+
+button {
+    background: #1769d2;
+    color: white;
+    border: none;
+    padding: 11px 17px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.logout {
+    background: #d93636;
+}
+
+.result-card {
+    border-bottom: 1px solid #ddd;
+    padding: 15px 0;
+}
+
+.muted {
+    color: #666;
+    font-size: 14px;
+}
+
+.error {
+    color: red;
+    white-space: pre-wrap;
+}
+
+.badge {
+    display: inline-block;
+    background: #e5f0ff;
+    color: #1769d2;
+    padding: 5px 9px;
+    border-radius: 5px;
 }
 </style>
 </head>
@@ -65,87 +94,83 @@ button{
 <body>
 
 <header>
-    <h2>ExamHub</h2>
-    <button class="logout" id="logoutBtn">Logout</button>
+    <div>
+        <h2>ExamHub Student Dashboard</h2>
+        <div id="userEmail"></div>
+    </div>
+
+    <button class="logout" onclick="logout()">Logout</button>
 </header>
 
 <div class="container">
 
-    <h2>Student Dashboard</h2>
+    <div class="section">
+        <h2>Available Exams</h2>
+        <div id="examList" class="cards">
+            Loading Exams...
+        </div>
+    </div>
 
-    <div id="welcome">Welcome to ExamHub!</div>
+    <div class="section">
+        <h2>My Results</h2>
+        <div id="resultList">
+            Loading Results...
+        </div>
+    </div>
 
-    <div id="status">Loading Exams...</div>
-
-    <h2>Available Exams</h2>
-
-    <div class="grid" id="examList"></div>
+    <p id="error" class="error"></p>
 
 </div>
 
 <script>
 
-async function initDashboard(){
+async function initDashboard() {
 
-    try{
+    try {
 
-        if(typeof supabaseClient === "undefined"){
-            throw new Error("Supabase connection not found.");
-        }
-
-        const {data:sessionData,error:sessionError} =
+        const { data: sessionData, error: sessionError } =
             await supabaseClient.auth.getSession();
 
-        if(sessionError) throw sessionError;
+        if (sessionError) throw sessionError;
 
-        if(!sessionData.session){
-            window.location.replace("./login.html");
+        if (!sessionData.session) {
+            location.href = "./login.html";
             return;
         }
 
-        const user = sessionData.session.user;
-
-        document.getElementById("welcome").textContent =
-            "Logged in: " + user.email;
+        document.getElementById("userEmail").textContent =
+            sessionData.session.user.email;
 
         await loadExams();
+        await loadResults();
 
-    }catch(error){
-
-        document.getElementById("status").textContent =
-            "Error: " + error.message;
-
+    } catch (error) {
+        showError(error.message);
     }
 
 }
 
 
-async function loadExams(){
+async function loadExams() {
 
-    const status = document.getElementById("status");
-    const list = document.getElementById("examList");
+    const container = document.getElementById("examList");
 
-    status.textContent = "Loading available exams...";
-    list.innerHTML = "";
-
-    const {data:exams,error} = await supabaseClient
+    const { data, error } = await supabaseClient
         .from("exams")
         .select("id,title,description,class_name,subject,fee")
-        .eq("is_published",true)
-        .order("created_at",{ascending:false});
+        .eq("is_published", true)
+        .order("id", { ascending: false });
 
-    if(error) throw error;
+    if (error) throw error;
 
-    if(!exams || exams.length===0){
+    container.innerHTML = "";
 
-        status.textContent = "Abhi koi published exam available nahi hai.";
+    if (!data || data.length === 0) {
+        container.textContent = "Abhi koi published exam available nahi hai.";
         return;
-
     }
 
-    status.textContent = exams.length + " Exams Available";
-
-    exams.forEach(exam=>{
+    data.forEach(exam => {
 
         const card = document.createElement("div");
         card.className = "card";
@@ -154,59 +179,123 @@ async function loadExams(){
         title.textContent = exam.title;
 
         const description = document.createElement("p");
-        description.textContent = exam.description || "No description";
+        description.textContent = exam.description || "";
 
-        const classInfo = document.createElement("p");
-        classInfo.textContent = "Class: " + (exam.class_name || "-");
-
-        const subjectInfo = document.createElement("p");
-        subjectInfo.textContent = "Subject: " + (exam.subject || "-");
+        const details = document.createElement("p");
+        details.className = "muted";
+        details.textContent =
+            (exam.class_name || "") + " | " +
+            (exam.subject || "");
 
         const fee = document.createElement("p");
-        fee.className = "fee";
-        fee.textContent = Number(exam.fee) > 0
-            ? "Test Fee: ₹" + exam.fee
-            : "Free Test";
+        fee.className = "badge";
+        fee.textContent =
+            Number(exam.fee || 0) === 0
+                ? "FREE TEST"
+                : "Fee: ₹" + exam.fee;
 
-        const startButton = document.createElement("button");
-        startButton.textContent = "Start Test";
+        const button = document.createElement("button");
+        button.textContent = "Start Test";
 
-        startButton.addEventListener("click",()=>{
+        button.onclick = () => {
+            location.href =
+                "./test.html?exam=" +
+                encodeURIComponent(exam.id);
+        };
 
-            window.location.href =
-                "./test.html?exam=" + encodeURIComponent(exam.id);
-
-        });
-
-        card.append(
-            title,
-            description,
-            classInfo,
-            subjectInfo,
-            fee,
-            startButton
-        );
-
-        list.appendChild(card);
+        card.append(title, description, details, fee, button);
+        container.appendChild(card);
 
     });
 
 }
 
 
-document.getElementById("logoutBtn")
-.addEventListener("click",async()=>{
+async function loadResults() {
 
-    const {error} = await supabaseClient.auth.signOut();
+    const container = document.getElementById("resultList");
 
-    if(error){
-        alert(error.message);
+    const { data, error } = await supabaseClient.rpc(
+        "get_my_results"
+    );
+
+    if (error) throw error;
+
+    container.innerHTML = "";
+
+    if (!data || data.length === 0) {
+        container.textContent =
+            "Abhi tak aapne koi Test complete nahi kiya hai.";
         return;
     }
 
-    window.location.replace("./login.html");
+    data.forEach(result => {
 
-});
+        const card = document.createElement("div");
+        card.className = "result-card";
+
+        const title = document.createElement("h3");
+        title.textContent = result.exam_title;
+
+        const details = document.createElement("p");
+
+        details.textContent =
+            "Total Questions: " + result.total_questions +
+            " | Attempted: " + result.attempted_questions;
+
+        const score = document.createElement("p");
+
+        score.innerHTML = "";
+
+        const scoreLabel = document.createElement("strong");
+        scoreLabel.textContent = "Score: ";
+
+        score.append(
+            scoreLabel,
+            document.createTextNode(String(result.score))
+        );
+
+        const answers = document.createElement("p");
+        answers.textContent =
+            "Correct: " + result.correct_answers +
+            " | Wrong: " + result.wrong_answers;
+
+        const date = document.createElement("p");
+        date.className = "muted";
+
+        date.textContent = result.completed_at
+            ? "Completed: " +
+              new Date(result.completed_at).toLocaleString("en-IN")
+            : "";
+
+        card.append(title, details, score, answers, date);
+        container.appendChild(card);
+
+    });
+
+}
+
+
+async function logout() {
+
+    const { error } = await supabaseClient.auth.signOut();
+
+    if (error) {
+        showError(error.message);
+        return;
+    }
+
+    location.href = "./login.html";
+
+}
+
+
+function showError(message) {
+
+    document.getElementById("error").textContent =
+        "Error: " + message;
+
+}
 
 
 initDashboard();
