@@ -464,8 +464,7 @@ function editExam(id) {
     $("examDescription").value = exam.description || "";
     $("examClass").value = exam.class_name || "";
     $("examSubject").value = exam.subject || "";
-    $("examFee").value = exam.fee ?? 0;
-    $("examPublished").checked = !!exam.is_published;
+    $("examDuration").value = exam.duration_minutes ?? 30;
 
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
