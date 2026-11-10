@@ -330,12 +330,22 @@ async function saveExam() {
             return;
         }
 
-        const fee = Number($("examFee").value);
+        const duration = Number($("examDuration").value);
 
-        if (!Number.isFinite(fee) || fee < 0) {
-            alert("Valid fee enter karein.");
-            return;
-        }
+if (!Number.isInteger(duration) || duration < 1 || duration > 300) {
+    alert("Timer 1 se 300 minutes ke beech rakhein.");
+    return;
+}
+
+const exam = {
+    title,
+    description: $("examDescription").value.trim(),
+    class_name: $("examClass").value.trim(),
+    subject: $("examSubject").value.trim(),
+    fee,
+    duration_minutes: duration,
+    is_published: $("examPublished").checked
+};
 
         const exam = {
             title,
