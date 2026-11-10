@@ -343,9 +343,15 @@ async function submitTest(autoSubmit = false) {
             <b>Score:</b> ${result.score}
         `;
 
-        document.getElementById("examTitle").textContent =
-            "Your Result";
+        const duration = Number(exam.duration_minutes);
 
+if (!Number.isInteger(duration) || duration < 1 || duration > 300) {
+    throw new Error("Exam Timer setting galat hai.");
+}
+
+timeLeft = duration * 60;
+
+updateTimer();
     } catch (error) {
 
         submitting = false;
