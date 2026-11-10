@@ -111,8 +111,15 @@ label{font-weight:bold}
             <label>Subject</label>
             <input id="examSubject" placeholder="Subject">
 
-            <label>Test Fee</label>
-            <input id="examFee" type="number" min="0" step="0.01" value="0">
+            <label>Test Duration (Minutes)</label>
+<input
+    id="examDuration"
+    type="number"
+    min="1"
+    max="300"
+    value="30"
+    required
+>
 
             <label>
                 <input type="checkbox" id="examPublished" style="width:auto">
