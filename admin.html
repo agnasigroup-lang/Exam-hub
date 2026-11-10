@@ -1125,9 +1125,20 @@ async function loadQuestions() {
     }
 }
 
-$("questionExam").addEventListener("change", () => {
-    clearQuestionForm(false);
-    loadQuestions();
+    $("questionExam").addEventListener("change", async function () {
+
+    const selectedExam = this.value;
+
+    clearQuestionForm(true);
+
+    this.value = selectedExam;
+
+    if (!selectedExam) {
+        $("questionList").textContent = "Select an exam to see questions.";
+        return;
+    }
+
+    await loadQuestions();
 });
 
 /* EDIT QUESTION */
