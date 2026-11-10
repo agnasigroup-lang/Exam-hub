@@ -908,7 +908,8 @@ async function loadExams() {
                 "Class: " + (exam.class_name || "-") +
                 " | Subject: " + (exam.subject || "-") +
                 " | Fee: ₹" + exam.fee +
-                " | " + (exam.is_published ? "Published" : "Unpublished");
+" | Timer: " + (exam.duration_minutes || 30) + " Minutes" +
+" | " + (exam.is_published ? "Published" : "Unpublished");
 
             const edit = document.createElement("button");
             edit.textContent = "Edit";
