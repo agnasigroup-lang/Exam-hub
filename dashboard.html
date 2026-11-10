@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExamHub - Student Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./config.js"></script>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f1f5f9;
+    color:#1e293b;
+}
+header{
+    background:#172554;
+    color:white;
+    padding:18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+}
+.container{
+    max-width:1100px;
+    margin:25px auto;
+    padding:15px;
+}
+h2{margin-top:0}
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:18px;
+}
+.card{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 2px 8px #0001;
+}
+button{
+    background:#2563eb;
+    color:white;
+    border:0;
+    padding:12px 18px;
+    border-radius:6px;
+    cursor:pointer;
+}
+.logout{background:#dc2626}
+.fee{font-weight:bold;color:#15803d}
+#status{
+    background:white;
+    padding:15px;
+    border-radius:8px;
+    margin-bottom:20px;
+    overflow-wrap:anywhere;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2>ExamHub</h2>
+    <button class="logout" id="logoutBtn">Logout</button>
+</header>
+
+<div class="container">
+
+    <h2>Student Dashboard</h2>
+
+    <div id="welcome">Welcome to ExamHub!</div>
+
+    <div id="status">Loading Exams...</div>
+
+    <h2>Available Exams</h2>
+
+    <div class="grid" id="examList"></div>
+
+</div>
+
+<script>
+
+async function initDashboard(){
+
+    try{
+
+        if(typeof supabaseClient === "undefined"){
+            throw new Error("Supabase connection not found.");
+        }
+
+        const {data:sessionData,error:sessionError} =
+            await supabaseClient.auth.getSession();
+
+        if(sessionError) throw sessionError;
+
+        if(!sessionData.session){
+            window.location.replace("./login.html");
+            return;
+        }
+
+        const user = sessionData.session.user;
+
+        document.getElementById("welcome").textContent =
+            "Logged in: " + user.email;
+
+        await loadExams();
+
+    }catch(error){
+
+        document.getElementById("status").textContent =
+            "Error: " + error.message;
+
+    }
+
+}
+
+
+async function loadExams(){
+
+    const status = document.getElementById("status");
+    const list = document.getElementById("examList");
+
+    status.textContent = "Loading available exams...";
+    list.innerHTML = "";
+
+    const {data:exams,error} = await supabaseClient
+        .from("exams")
+        .select("id,title,description,class_name,subject,fee")
+        .eq("is_published",true)
+        .order("created_at",{ascending:false});
+
+    if(error) throw error;
+
+    if(!exams || exams.length===0){
+
+        status.textContent = "Abhi koi published exam available nahi hai.";
+        return;
+
+    }
+
+    status.textContent = exams.length + " Exams Available";
+
+    exams.forEach(exam=>{
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const title = document.createElement("h3");
+        title.textContent = exam.title;
+
+        const description = document.createElement("p");
+        description.textContent = exam.description || "No description";
+
+        const classInfo = document.createElement("p");
+        classInfo.textContent = "Class: " + (exam.class_name || "-");
+
+        const subjectInfo = document.createElement("p");
+        subjectInfo.textContent = "Subject: " + (exam.subject || "-");
+
+        const fee = document.createElement("p");
+        fee.className = "fee";
+        fee.textContent = Number(exam.fee) > 0
+            ? "Test Fee: ₹" + exam.fee
+            : "Free Test";
+
+        const startButton = document.createElement("button");
+        startButton.textContent = "Start Test";
+
+        startButton.addEventListener("click",()=>{
+
+            window.location.href =
+                "./test.html?exam=" + encodeURIComponent(exam.id);
+
+        });
+
+        card.append(
+            title,
+            description,
+            classInfo,
+            subjectInfo,
+            fee,
+            startButton
+        );
+
+        list.appendChild(card);
+
+    });
+
+}
+
+
+document.getElementById("logoutBtn")
+.addEventListener("click",async()=>{
+
+    const {error} = await supabaseClient.auth.signOut();
+
+    if(error){
+        alert(error.message);
+        return;
+    }
+
+    window.location.replace("./login.html");
+
+});
+
+
+initDashboard();
+
+</script>
+
+</body>
+</html>
