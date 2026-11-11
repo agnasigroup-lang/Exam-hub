@@ -9,75 +9,88 @@
 <script src="./config.js"></script>
 
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f2f5fa;
-    margin: 0;
-    padding: 15px;
+*{box-sizing:border-box}
+
+body{
+    font-family:Arial,sans-serif;
+    background:#f2f5fa;
+    margin:0;
+    padding:15px;
 }
-.container {
-    max-width: 750px;
-    margin: 20px auto;
-    background: white;
-    padding: 22px;
-    border-radius: 12px;
+
+.container{
+    max-width:750px;
+    margin:20px auto;
+    background:white;
+    padding:22px;
+    border-radius:12px;
 }
-h2 { color: #183b70; }
-.top {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 12px;
+
+h2{color:#183b70}
+
+.top{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    border-bottom:1px solid #ddd;
+    padding-bottom:12px;
 }
-#timer {
-    color: #d62828;
-    font-weight: bold;
-    font-size: 20px;
+
+#timer{
+    color:#d62828;
+    font-weight:bold;
+    font-size:22px;
 }
-.question {
-    font-size: 19px;
-    margin: 25px 0;
-    font-weight: bold;
+
+.question{
+    font-size:19px;
+    margin:25px 0;
+    font-weight:bold;
 }
-.option {
-    display: block;
-    background: #f3f6fb;
-    padding: 13px;
-    margin: 10px 0;
-    border-radius: 8px;
-    cursor: pointer;
+
+.option{
+    display:block;
+    background:#f3f6fb;
+    padding:13px;
+    margin:10px 0;
+    border-radius:8px;
+    cursor:pointer;
 }
-.option input {
-    margin-right: 10px;
+
+.option input{margin-right:10px}
+
+button{
+    padding:12px 18px;
+    border:none;
+    border-radius:7px;
+    background:#1769d2;
+    color:white;
+    cursor:pointer;
+    margin:5px;
 }
-button {
-    padding: 12px 18px;
-    border: none;
-    border-radius: 7px;
-    background: #1769d2;
-    color: white;
-    cursor: pointer;
-    margin: 5px;
+
+button:disabled{
+    background:#999;
 }
-button:disabled {
-    background: #999;
-    cursor: not-allowed;
+
+#result{
+    display:none;
+    background:#e9f8ee;
+    padding:18px;
+    border-radius:10px;
 }
-.navigation {
-    margin-top: 25px;
+
+#error{
+    color:#c62828;
+    background:#fff0f0;
+    padding:10px;
+    border-radius:6px;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
 }
-#result {
-    display: none;
-    background: #e9f8ee;
-    padding: 18px;
-    border-radius: 10px;
-}
-#error {
-    color: red;
-    white-space: pre-wrap;
-}
+
+.hidden{display:none}
 </style>
 </head>
 
@@ -85,54 +98,50 @@ button:disabled {
 
 <div class="container">
 
-    <h2 id="examTitle">Loading Exam...</h2>
+<h2 id="examTitle">Loading Exam...</h2>
 
-    <div class="top">
-        <span id="questionCount"></span>
-        <span id="timer">30:00</span>
-    </div>
+<div class="top">
+    <span id="questionCount">Loading Questions...</span>
+    <span id="timer">00:00</span>
+</div>
 
-    <div id="testArea" style="display:none">
+<div id="testArea" style="display:none">
 
-        <div class="question" id="questionText"></div>
+    <div class="question" id="questionText"></div>
 
-        <div id="options"></div>
+    <div id="options"></div>
 
-        <div class="navigation">
-            <button id="previousBtn" onclick="previousQuestion()">
-                Previous
-            </button>
-
-            <button onclick="nextQuestion()">
-                Next
-            </button>
-
-            <button onclick="skipQuestion()">
-                Skip
-            </button>
-
-            <button id="submitBtn" onclick="submitTest()"
-                style="background:#198754">
-                Submit Test
-            </button>
-        </div>
-
-    </div>
-
-    <div id="result">
-        <h2>Test Completed!</h2>
-        <p id="resultDetails"></p>
-        <button onclick="location.href='./dashboard.html'">
-            Go to Dashboard
+    <div>
+        <button id="previousBtn">Previous</button>
+        <button id="nextBtn">Next</button>
+        <button id="skipBtn">Skip</button>
+        <button id="submitBtn" style="background:#198754">
+            Submit Test
         </button>
     </div>
 
-    <p id="error"></p>
+</div>
+
+<div id="result">
+
+    <h2>Test Completed!</h2>
+
+    <div id="resultDetails"></div>
+
+    <button onclick="location.href='./dashboard.html'">
+        Go to Dashboard
+    </button>
+
+</div>
+
+<p id="error"></p>
 
 </div>
 
 <script>
-    "use strict";
+"use strict";
+
+/* VARIABLES */
 
 let examId = new URLSearchParams(location.search).get("exam");
 
@@ -144,117 +153,210 @@ let timeLeft = 0;
 let timerInterval = null;
 let submitting = false;
 
-/* LOAD EXAM */
 
-async function initTest() {
+/* ELEMENTS */
 
-    try {
+const titleElement = document.getElementById("examTitle");
+const timerElement = document.getElementById("timer");
+const errorElement = document.getElementById("error");
+const testArea = document.getElementById("testArea");
 
-        document.getElementById("error").textContent = "";
 
-        if (!examId || !/^\d+$/.test(examId)) {
-            throw new Error("Invalid Exam ID");
+/* ERROR DISPLAY */
+
+function showError(error){
+
+    clearInterval(timerInterval);
+
+    const message = error && error.message
+        ? error.message
+        : String(error);
+
+    titleElement.textContent = "Test Load Failed";
+
+    errorElement.textContent = "Error: " + message;
+
+    console.error("ExamHub Error:",error);
+
+}
+
+
+/* INITIALIZE TEST */
+
+async function initTest(){
+
+    try{
+
+        errorElement.textContent = "";
+
+        titleElement.textContent = "Loading Exam...";
+
+        if(!window.supabase){
+            throw new Error("Supabase library load nahi hui.");
         }
 
-        const { data: sessionData, error: sessionError } =
+        if(typeof supabaseClient === "undefined"){
+            throw new Error("config.js load nahi hui.");
+        }
+
+        if(!examId || !/^\d+$/.test(examId)){
+            throw new Error("Exam ID missing ya invalid hai.");
+        }
+
+
+        /* CHECK LOGIN */
+
+        const sessionResult =
             await supabaseClient.auth.getSession();
 
-        if (sessionError) throw sessionError;
+        if(sessionResult.error){
+            throw sessionResult.error;
+        }
 
-        if (!sessionData.session) {
-            location.href = "./login.html";
+        if(!sessionResult.data.session){
+
+            location.replace("./login.html");
             return;
+
         }
 
-        // FETCH EXAM
 
-        const { data: examData, error: examError } =
-            await supabaseClient
-                .from("exams")
-                .select("id,title,is_published,duration_minutes")
-                .eq("id", Number(examId))
-                .eq("is_published", true)
-                .maybeSingle();
+        /* FETCH EXAM */
 
-        if (examError) throw examError;
+        titleElement.textContent = "Fetching Exam...";
 
-        if (!examData) {
-            throw new Error("Exam not found or not published.");
+        const examResult = await supabaseClient
+            .from("exams")
+            .select("id,title,is_published,duration_minutes")
+            .eq("id",Number(examId))
+            .maybeSingle();
+
+        if(examResult.error){
+            throw examResult.error;
         }
 
-        exam = examData;
+        if(!examResult.data){
+            throw new Error(
+                "Exam nahi mila. Exam ID: " + examId
+            );
+        }
 
-        // SET EXAM TITLE
+        exam = examResult.data;
 
-        document.getElementById("examTitle").textContent =
-            exam.title;
+        if(!exam.is_published){
+            throw new Error("Ye Exam abhi Published nahi hai.");
+        }
 
-        // SET TIMER
+
+        /* SET TITLE */
+
+        titleElement.textContent = exam.title;
+
+
+        /* SET DURATION */
 
         const duration = Number(exam.duration_minutes);
 
-        if (!Number.isInteger(duration) ||
-            duration < 1 || duration > 300) {
+        if(!Number.isInteger(duration) ||
+           duration < 1 ||
+           duration > 300){
 
-            throw new Error("Exam duration galat hai.");
+            throw new Error(
+                "Exam duration invalid hai: " +
+                exam.duration_minutes
+            );
+
         }
 
         timeLeft = duration * 60;
 
         updateTimer();
 
-        // FETCH QUESTIONS
 
-        const { data, error } = await supabaseClient.rpc(
-            "get_exam_questions",
-            {
-                p_exam_id: Number(examId)
-            }
-        );
+        /* FETCH QUESTIONS */
 
-        if (error) throw error;
+        document.getElementById("questionCount").textContent =
+            "Loading Questions...";
 
-        questions = data || [];
+        const questionResult =
+            await supabaseClient.rpc(
+                "get_exam_questions",
+                {
+                    p_exam_id:Number(exam.id)
+                }
+            );
 
-        if (questions.length === 0) {
-            throw new Error("Is Exam mein abhi koi question nahi hai.");
+        if(questionResult.error){
+            throw questionResult.error;
         }
 
-        // SHOW TEST
+        questions = questionResult.data || [];
 
-        document.getElementById("testArea").style.display = "block";
+        if(!Array.isArray(questions) ||
+           questions.length === 0){
+
+            throw new Error(
+                "Is Exam mein koi Question nahi mila."
+            );
+
+        }
+
+
+        /* START TEST */
+
+        currentIndex = 0;
+
+        answers = {};
+
+        testArea.style.display = "block";
 
         showQuestion();
 
         startTimer();
 
-    } catch (error) {
-
-        showError(error.message);
+        errorElement.textContent = "";
 
     }
+    catch(error){
+
+        showError(error);
+
+    }
+
 }
+
 
 /* SHOW QUESTION */
 
-function showQuestion() {
+function showQuestion(){
+
+    if(!questions.length) return;
 
     const q = questions[currentIndex];
 
+    if(!q){
+        showError("Question data missing hai.");
+        return;
+    }
+
     document.getElementById("questionCount").textContent =
-        "Question " + (currentIndex + 1) +
-        " of " + questions.length;
+        "Question " +
+        (currentIndex + 1) +
+        " / " +
+        questions.length;
 
     document.getElementById("questionText").textContent =
         q.question_text;
 
-    const options = document.getElementById("options");
+    const optionsElement =
+        document.getElementById("options");
 
-    options.innerHTML = "";
+    optionsElement.innerHTML = "";
 
-    ["A", "B", "C", "D"].forEach(letter => {
+    ["A","B","C","D"].forEach(letter=>{
 
-        const value = q["option_" + letter.toLowerCase()];
+        const value =
+            q["option_" + letter.toLowerCase()];
 
         const label = document.createElement("label");
 
@@ -268,30 +370,38 @@ function showQuestion() {
 
         radio.checked = answers[q.id] === letter;
 
-        radio.addEventListener("change", () => {
+        radio.addEventListener("change",()=>{
+
             answers[q.id] = letter;
+
         });
 
         label.appendChild(radio);
 
         label.appendChild(
-            document.createTextNode(letter + ". " + value)
+            document.createTextNode(
+                letter + ". " + (value || "")
+            )
         );
 
-        options.appendChild(label);
+        optionsElement.appendChild(label);
 
     });
 
     document.getElementById("previousBtn").disabled =
         currentIndex === 0;
 
+    document.getElementById("nextBtn").disabled =
+        currentIndex === questions.length - 1;
+
 }
+
 
 /* NEXT */
 
-function nextQuestion() {
+function nextQuestion(){
 
-    if (currentIndex < questions.length - 1) {
+    if(currentIndex < questions.length - 1){
 
         currentIndex++;
 
@@ -301,11 +411,12 @@ function nextQuestion() {
 
 }
 
+
 /* PREVIOUS */
 
-function previousQuestion() {
+function previousQuestion(){
 
-    if (currentIndex > 0) {
+    if(currentIndex > 0){
 
         currentIndex--;
 
@@ -315,29 +426,45 @@ function previousQuestion() {
 
 }
 
+
 /* SKIP */
 
-function skipQuestion() {
+function skipQuestion(){
 
     nextQuestion();
 
 }
 
+
 /* TIMER */
 
-function startTimer() {
+function updateTimer(){
+
+    const minutes = Math.floor(timeLeft / 60);
+
+    const seconds = timeLeft % 60;
+
+    timerElement.textContent =
+        String(minutes).padStart(2,"0") +
+        ":" +
+        String(seconds).padStart(2,"0");
+
+}
+
+
+function startTimer(){
 
     clearInterval(timerInterval);
 
     updateTimer();
 
-    timerInterval = setInterval(() => {
+    timerInterval = setInterval(()=>{
 
         timeLeft--;
 
         updateTimer();
 
-        if (timeLeft <= 0) {
+        if(timeLeft <= 0){
 
             clearInterval(timerInterval);
 
@@ -345,34 +472,22 @@ function startTimer() {
 
         }
 
-    }, 1000);
+    },1000);
 
 }
 
-/* UPDATE TIMER */
-
-function updateTimer() {
-
-    const minutes = Math.floor(timeLeft / 60);
-
-    const seconds = timeLeft % 60;
-
-    document.getElementById("timer").textContent =
-        String(minutes).padStart(2, "0") + ":" +
-        String(seconds).padStart(2, "0");
-
-}
 
 /* SUBMIT TEST */
 
-async function submitTest(autoSubmit = false) {
+async function submitTest(autoSubmit=false){
 
-    if (submitting) return;
+    if(submitting) return;
 
-    if (!autoSubmit &&
-        !confirm("Kya aap Test Submit karna chahte hain?")) {
+    if(!autoSubmit){
 
-        return;
+        if(!confirm("Kya aap Test Submit karna chahte hain?")){
+            return;
+        }
 
     }
 
@@ -382,57 +497,76 @@ async function submitTest(autoSubmit = false) {
 
     document.getElementById("submitBtn").disabled = true;
 
-    try {
+    try{
 
-        const { data, error } = await supabaseClient.rpc(
+        const resultData = await supabaseClient.rpc(
             "submit_exam",
             {
-                p_exam_id: Number(examId),
-                p_answers: answers
+                p_exam_id:Number(examId),
+                p_answers:answers
             }
         );
 
-        if (error) throw error;
+        if(resultData.error){
+            throw resultData.error;
+        }
 
-        const result = Array.isArray(data) ? data[0] : data;
+        const result = Array.isArray(resultData.data)
+            ? resultData.data[0]
+            : resultData.data;
 
-        if (!result) {
+        if(!result){
             throw new Error("Result receive nahi hua.");
         }
 
-        document.getElementById("testArea").style.display = "none";
+        testArea.style.display = "none";
 
         document.getElementById("result").style.display = "block";
 
         document.getElementById("resultDetails").innerHTML = `
-            <b>Total Questions:</b> ${result.total_questions}<br><br>
-            <b>Attempted:</b> ${result.attempted_questions}<br><br>
-            <b>Correct Answers:</b> ${result.correct_answers}<br><br>
-            <b>Wrong Answers:</b> ${result.wrong_answers}<br><br>
-            <b>Score:</b> ${result.score}
+            <p>Total Questions: ${result.total_questions}</p>
+            <p>Attempted: ${result.attempted_questions}</p>
+            <p>Correct Answers: ${result.correct_answers}</p>
+            <p>Wrong Answers: ${result.wrong_answers}</p>
+            <h3>Score: ${result.score}</h3>
         `;
 
-    } catch (error) {
+        titleElement.textContent = "Test Completed";
+
+    }
+    catch(error){
 
         submitting = false;
 
         document.getElementById("submitBtn").disabled = false;
 
-        showError(error.message);
+        showError(error);
 
     }
 
 }
 
-/* SHOW ERROR */
 
-function showError(message) {
+/* BUTTON EVENTS */
 
-    document.getElementById("error").textContent =
-        "Error: " + message;
+document.getElementById("previousBtn")
+    .addEventListener("click",previousQuestion);
 
-}
+document.getElementById("nextBtn")
+    .addEventListener("click",nextQuestion);
+
+document.getElementById("skipBtn")
+    .addEventListener("click",skipQuestion);
+
+document.getElementById("submitBtn")
+    .addEventListener("click",()=>submitTest(false));
+
 
 /* START */
 
 initTest();
+
+</script>
+
+</body>
+</html>
