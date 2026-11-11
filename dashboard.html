@@ -3,159 +3,122 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ExamHub - Student Dashboard</title>
+<title>ExamHub Dashboard</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="./config.js"></script>
 
 <style>
 body {
     font-family: Arial, sans-serif;
-    background: #f2f5fa;
+    background: #f3f4f6;
     margin: 0;
-    padding: 15px;
-    color: #222;
-}
-
-header {
-    background: #173e78;
-    color: white;
-    padding: 18px;
-    border-radius: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.container {
-    max-width: 1000px;
-    margin: 20px auto;
-}
-
-.section {
-    background: white;
     padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 22px;
 }
-
-.cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 15px;
+.container {
+    max-width: 900px;
+    margin: auto;
 }
-
 .card {
-    border: 1px solid #ddd;
-    padding: 16px;
-    border-radius: 9px;
+    background: white;
+    padding: 18px;
+    margin: 15px 0;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #ddd;
 }
-
 button {
-    background: #1769d2;
-    color: white;
+    padding: 11px 18px;
     border: none;
-    padding: 11px 17px;
     border-radius: 6px;
+    background: #2563eb;
+    color: white;
     cursor: pointer;
+    margin-top: 10px;
 }
-
+button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
 .logout {
-    background: #d93636;
+    background: #dc2626;
 }
-
-.result-card {
-    border-bottom: 1px solid #ddd;
-    padding: 15px 0;
+.price {
+    font-weight: bold;
+    color: #15803d;
 }
-
-.muted {
-    color: #666;
-    font-size: 14px;
-}
-
 .error {
-    color: red;
-    white-space: pre-wrap;
-}
-
-.badge {
-    display: inline-block;
-    background: #e5f0ff;
-    color: #1769d2;
-    padding: 5px 9px;
-    border-radius: 5px;
+    color: #dc2626;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-    <div>
-        <h2>ExamHub Student Dashboard</h2>
-        <div id="userEmail"></div>
-    </div>
-
-    <button class="logout" onclick="logout()">Logout</button>
-</header>
-
 <div class="container">
 
-    <div class="section">
-        <h2>Available Exams</h2>
-        <div id="examList" class="cards">
-            Loading Exams...
-        </div>
-    </div>
+<h1>ExamHub Dashboard</h1>
 
-    <div class="section">
-        <h2>My Results</h2>
-        <div id="resultList">
-            Loading Results...
-        </div>
-    </div>
+<p>Welcome: <span id="userEmail">Loading...</span></p>
 
-    <p id="error" class="error"></p>
+<button class="logout" onclick="logout()">Logout</button>
+
+<h2>Available Exams</h2>
+<div id="examList">Loading exams...</div>
+
+<h2>My Results</h2>
+<div id="resultList">Loading results...</div>
+
+<p id="message" class="error"></p>
 
 </div>
 
 <script>
 
+let currentUser = null;
+
+function showMessage(message) {
+    document.getElementById("message").textContent = message;
+}
+
+function addText(parent, tag, text, className) {
+    const element = document.createElement(tag);
+    element.textContent = text;
+    if (className) element.className = className;
+    parent.appendChild(element);
+    return element;
+}
+
 async function initDashboard() {
-
     try {
-
-        const { data: sessionData, error: sessionError } =
+        const { data: { session }, error } =
             await supabaseClient.auth.getSession();
 
-        if (sessionError) throw sessionError;
+        if (error) throw error;
 
-        if (!sessionData.session) {
+        if (!session) {
             location.href = "./login.html";
             return;
         }
 
+        currentUser = session.user;
+
         document.getElementById("userEmail").textContent =
-            sessionData.session.user.email;
+            currentUser.email || "";
 
         await loadExams();
         await loadResults();
 
     } catch (error) {
-        showError(error.message);
+        showMessage(error.message);
     }
-
 }
 
-
 async function loadExams() {
+    const examList = document.getElementById("examList");
+    examList.textContent = "Loading exams...";
 
-    const container = document.getElementById("examList");
-
-    const { data, error } = await supabaseClient
+    const { data: exams, error } = await supabaseClient
         .from("exams")
         .select("id,title,description,class_name,subject,fee")
         .eq("is_published", true)
@@ -163,140 +126,230 @@ async function loadExams() {
 
     if (error) throw error;
 
-    container.innerHTML = "";
+    examList.replaceChildren();
 
-    if (!data || data.length === 0) {
-        container.textContent = "Abhi koi published exam available nahi hai.";
+    if (!exams || exams.length === 0) {
+        examList.textContent = "No exams available.";
         return;
     }
 
-    data.forEach(exam => {
+    const { data: paidPayments, error: paymentError } =
+        await supabaseClient
+        .from("payments")
+        .select("exam_id")
+        .eq("user_id", currentUser.id)
+        .eq("status", "paid");
 
+    if (paymentError) throw paymentError;
+
+    const paidExamIds = new Set(
+        (paidPayments || []).map(payment => String(payment.exam_id))
+    );
+
+    exams.forEach(exam => {
         const card = document.createElement("div");
         card.className = "card";
 
-        const title = document.createElement("h3");
-        title.textContent = exam.title;
+        addText(card, "h3", exam.title || "Untitled Exam");
+        addText(card, "p", exam.description || "");
+        addText(card, "p",
+            "Class: " + (exam.class_name || "-") +
+            " | Subject: " + (exam.subject || "-")
+        );
 
-        const description = document.createElement("p");
-        description.textContent = exam.description || "";
+        const fee = Number(exam.fee || 0);
 
-        const details = document.createElement("p");
-        details.className = "muted";
-        details.textContent =
-            (exam.class_name || "") + " | " +
-            (exam.subject || "");
-
-        const fee = document.createElement("p");
-        fee.className = "badge";
-        fee.textContent =
-            Number(exam.fee || 0) === 0
-                ? "FREE TEST"
-                : "Fee: ₹" + exam.fee;
+        addText(
+            card,
+            "p",
+            fee > 0 ? "Fee: ₹" + fee : "FREE TEST",
+            "price"
+        );
 
         const button = document.createElement("button");
-        button.textContent = "Start Test";
 
-        button.onclick = () => {
-            location.href =
-                "./test.html?exam=" +
-                encodeURIComponent(exam.id);
-        };
+        if (fee <= 0 || paidExamIds.has(String(exam.id))) {
+            button.textContent = "Start Test";
+            button.onclick = () => {
+                location.href = "./test.html?exam=" +
+                    encodeURIComponent(exam.id);
+            };
+        } else {
+            button.textContent = "Pay Now";
+            button.onclick = () => payForExam(exam, button);
+        }
 
-        card.append(title, description, details, fee, button);
-        container.appendChild(card);
-
+        card.appendChild(button);
+        examList.appendChild(card);
     });
-
 }
 
+async function payForExam(exam, button) {
+    try {
+        if (!window.Razorpay) {
+            throw new Error("Payment system load nahi hua. Page refresh karein.");
+        }
+
+        button.disabled = true;
+        button.textContent = "Processing...";
+
+        const { data: orderData, error: orderError } =
+            await supabaseClient.functions.invoke(
+                "create-razorpay-order",
+                {
+                    body: {
+                        exam_id: exam.id
+                    }
+                }
+            );
+
+        if (orderError) throw orderError;
+
+        if (!orderData || !orderData.order_id ||
+            !orderData.key_id || !orderData.amount) {
+            throw new Error(
+                orderData?.error || "Order create nahi hua."
+            );
+        }
+
+        const options = {
+            key: orderData.key_id,
+            amount: orderData.amount,
+            currency: orderData.currency || "INR",
+            name: "ExamHub",
+            description: exam.title,
+            order_id: orderData.order_id,
+
+            handler: async function(response) {
+                try {
+                    button.textContent = "Verifying Payment...";
+
+                    const { data: verifyData, error: verifyError } =
+                        await supabaseClient.functions.invoke(
+                            "verify-razorpay-payment",
+                            {
+                                body: {
+                                    razorpay_order_id:
+                                        response.razorpay_order_id,
+
+                                    razorpay_payment_id:
+                                        response.razorpay_payment_id,
+
+                                    razorpay_signature:
+                                        response.razorpay_signature
+                                }
+                            }
+                        );
+
+                    if (verifyError) throw verifyError;
+
+                    if (!verifyData || verifyData.success !== true) {
+                        throw new Error(
+                            verifyData?.error ||
+                            "Payment verification failed."
+                        );
+                    }
+
+                    alert("Payment Successful! Ab aap test de sakte hain.");
+
+                    location.href = "./test.html?exam=" +
+                        encodeURIComponent(exam.id);
+
+                } catch (error) {
+                    alert("Payment verification error: " + error.message);
+                    button.disabled = false;
+                    button.textContent = "Pay Now";
+                    await loadExams();
+                }
+            },
+
+            modal: {
+                ondismiss: function() {
+                    button.disabled = false;
+                    button.textContent = "Pay Now";
+                }
+            },
+
+            theme: {
+                color: "#2563eb"
+            }
+        };
+
+        const checkout = new Razorpay(options);
+
+        checkout.on("payment.failed", function(response) {
+            alert(
+                "Payment Failed: " +
+                (response.error.description || "Please try again.")
+            );
+
+            button.disabled = false;
+            button.textContent = "Pay Now";
+        });
+
+        checkout.open();
+
+    } catch (error) {
+        alert("Error: " + error.message);
+        button.disabled = false;
+        button.textContent = "Pay Now";
+    }
+}
 
 async function loadResults() {
+    const resultList = document.getElementById("resultList");
+    resultList.textContent = "Loading results...";
 
-    const container = document.getElementById("resultList");
-
-    const { data, error } = await supabaseClient.rpc(
-        "get_my_results"
-    );
+    const { data, error } =
+        await supabaseClient.rpc("get_my_results");
 
     if (error) throw error;
 
-    container.innerHTML = "";
+    resultList.replaceChildren();
 
     if (!data || data.length === 0) {
-        container.textContent =
-            "Abhi tak aapne koi Test complete nahi kiya hai.";
+        resultList.textContent = "No results yet.";
         return;
     }
 
     data.forEach(result => {
-
         const card = document.createElement("div");
-        card.className = "result-card";
+        card.className = "card";
 
-        const title = document.createElement("h3");
-        title.textContent = result.exam_title;
+        addText(card, "h3", result.exam_title || "Exam Result");
 
-        const details = document.createElement("p");
-
-        details.textContent =
-            "Total Questions: " + result.total_questions +
-            " | Attempted: " + result.attempted_questions;
-
-        const score = document.createElement("p");
-
-        score.innerHTML = "";
-
-        const scoreLabel = document.createElement("strong");
-        scoreLabel.textContent = "Score: ";
-
-        score.append(
-            scoreLabel,
-            document.createTextNode(String(result.score))
+        addText(card, "p",
+            "Total Questions: " + result.total_questions
         );
 
-        const answers = document.createElement("p");
-        answers.textContent =
-            "Correct: " + result.correct_answers +
-            " | Wrong: " + result.wrong_answers;
+        addText(card, "p",
+            "Attempted: " + result.attempted_questions
+        );
 
-        const date = document.createElement("p");
-        date.className = "muted";
+        addText(card, "p",
+            "Correct: " + result.correct_answers
+        );
 
-        date.textContent = result.completed_at
-            ? "Completed: " +
-              new Date(result.completed_at).toLocaleString("en-IN")
-            : "";
+        addText(card, "p",
+            "Wrong: " + result.wrong_answers
+        );
 
-        card.append(title, details, score, answers, date);
-        container.appendChild(card);
+        addText(card, "p",
+            "Score: " + result.score
+        );
 
+        addText(card, "p",
+            "Date: " + new Date(result.completed_at).toLocaleString()
+        );
+
+        resultList.appendChild(card);
     });
-
 }
-
 
 async function logout() {
-
-    const { error } = await supabaseClient.auth.signOut();
-
-    if (error) {
-        showError(error.message);
-        return;
-    }
-
+    await supabaseClient.auth.signOut();
     location.href = "./login.html";
-
 }
-
-
-function showError(message) {
-
-    document.getElementById("error").textContent =
-        "Error: " + message;
-
-}
-
 
 initDashboard();
 
