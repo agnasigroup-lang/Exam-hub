@@ -173,8 +173,7 @@ async function initTest() {
             throw new Error("Exam not found or not published.");
         }
 
-const duration = Number(exam.duration_minutes);
-
+timeLeft = Number(exam.duration_minutes) * 60;
 if (!Number.isInteger(duration) || duration < 1 || duration > 300) {
     throw new Error("Exam duration galat hai.");
 }
