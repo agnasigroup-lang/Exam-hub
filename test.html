@@ -132,18 +132,25 @@ button:disabled {
 </div>
 
 <script>
+    "use strict";
 
 let examId = new URLSearchParams(location.search).get("exam");
+
+let exam = null;
 let questions = [];
 let answers = {};
+let currentIndex = 0;
 let timeLeft = 0;
-let timeLeft = 30 * 60;
 let timerInterval = null;
 let submitting = false;
+
+/* LOAD EXAM */
 
 async function initTest() {
 
     try {
+
+        document.getElementById("error").textContent = "";
 
         if (!examId || !/^\d+$/.test(examId)) {
             throw new Error("Invalid Exam ID");
@@ -159,32 +166,50 @@ async function initTest() {
             return;
         }
 
-        const { data: exam, error: examError } =
+        // FETCH EXAM
+
+        const { data: examData, error: examError } =
             await supabaseClient
                 .from("exams")
                 .select("id,title,is_published,duration_minutes")
-                .eq("id", examId)
+                .eq("id", Number(examId))
                 .eq("is_published", true)
                 .maybeSingle();
 
         if (examError) throw examError;
 
-        if (!exam) {
+        if (!examData) {
             throw new Error("Exam not found or not published.");
         }
 
-timeLeft = Number(exam.duration_minutes) * 60;
-if (!Number.isInteger(duration) || duration < 1 || duration > 300) {
-    throw new Error("Exam duration galat hai.");
-}
+        exam = examData;
 
-timeLeft = duration * 60;
-document.getElementById("timer").textContent =
-    String(Math.floor(timeLeft / 60)).padStart(2, "0") + ":00";
+        // SET EXAM TITLE
+
+        document.getElementById("examTitle").textContent =
+            exam.title;
+
+        // SET TIMER
+
+        const duration = Number(exam.duration_minutes);
+
+        if (!Number.isInteger(duration) ||
+            duration < 1 || duration > 300) {
+
+            throw new Error("Exam duration galat hai.");
+        }
+
+        timeLeft = duration * 60;
+
+        updateTimer();
+
+        // FETCH QUESTIONS
 
         const { data, error } = await supabaseClient.rpc(
             "get_exam_questions",
-            { p_exam_id: Number(examId) }
+            {
+                p_exam_id: Number(examId)
+            }
         );
 
         if (error) throw error;
@@ -195,15 +220,22 @@ document.getElementById("timer").textContent =
             throw new Error("Is Exam mein abhi koi question nahi hai.");
         }
 
+        // SHOW TEST
+
         document.getElementById("testArea").style.display = "block";
 
         showQuestion();
+
         startTimer();
 
     } catch (error) {
+
         showError(error.message);
+
     }
 }
+
+/* SHOW QUESTION */
 
 function showQuestion() {
 
@@ -217,6 +249,7 @@ function showQuestion() {
         q.question_text;
 
     const options = document.getElementById("options");
+
     options.innerHTML = "";
 
     ["A", "B", "C", "D"].forEach(letter => {
@@ -224,12 +257,15 @@ function showQuestion() {
         const value = q["option_" + letter.toLowerCase()];
 
         const label = document.createElement("label");
+
         label.className = "option";
 
         const radio = document.createElement("input");
+
         radio.type = "radio";
         radio.name = "answer";
         radio.value = letter;
+
         radio.checked = answers[q.id] === letter;
 
         radio.addEventListener("change", () => {
@@ -237,6 +273,7 @@ function showQuestion() {
         });
 
         label.appendChild(radio);
+
         label.appendChild(
             document.createTextNode(letter + ". " + value)
         );
@@ -250,34 +287,47 @@ function showQuestion() {
 
 }
 
+/* NEXT */
+
 function nextQuestion() {
 
     if (currentIndex < questions.length - 1) {
+
         currentIndex++;
+
         showQuestion();
+
     }
 
 }
+
+/* PREVIOUS */
 
 function previousQuestion() {
 
     if (currentIndex > 0) {
+
         currentIndex--;
+
         showQuestion();
+
     }
 
 }
+
+/* SKIP */
 
 function skipQuestion() {
 
-    if (currentIndex < questions.length - 1) {
-        currentIndex++;
-        showQuestion();
-    }
+    nextQuestion();
 
 }
 
+/* TIMER */
+
 function startTimer() {
+
+    clearInterval(timerInterval);
 
     updateTimer();
 
@@ -288,18 +338,24 @@ function startTimer() {
         updateTimer();
 
         if (timeLeft <= 0) {
+
             clearInterval(timerInterval);
+
             submitTest(true);
+
         }
 
     }, 1000);
 
 }
 
+/* UPDATE TIMER */
+
 function updateTimer() {
 
-    let minutes = Math.floor(timeLeft / 60);
-    let seconds = timeLeft % 60;
+    const minutes = Math.floor(timeLeft / 60);
+
+    const seconds = timeLeft % 60;
 
     document.getElementById("timer").textContent =
         String(minutes).padStart(2, "0") + ":" +
@@ -307,13 +363,17 @@ function updateTimer() {
 
 }
 
+/* SUBMIT TEST */
+
 async function submitTest(autoSubmit = false) {
 
     if (submitting) return;
 
     if (!autoSubmit &&
         !confirm("Kya aap Test Submit karna chahte hain?")) {
+
         return;
+
     }
 
     submitting = true;
@@ -334,9 +394,14 @@ async function submitTest(autoSubmit = false) {
 
         if (error) throw error;
 
-        const result = data[0];
+        const result = Array.isArray(data) ? data[0] : data;
+
+        if (!result) {
+            throw new Error("Result receive nahi hua.");
+        }
 
         document.getElementById("testArea").style.display = "none";
+
         document.getElementById("result").style.display = "block";
 
         document.getElementById("resultDetails").innerHTML = `
@@ -347,33 +412,27 @@ async function submitTest(autoSubmit = false) {
             <b>Score:</b> ${result.score}
         `;
 
-        const duration = Number(exam.duration_minutes);
-
-if (!Number.isInteger(duration) || duration < 1 || duration > 300) {
-    throw new Error("Exam Timer setting galat hai.");
-}
-
-timeLeft = duration * 60;
-
-updateTimer();
     } catch (error) {
 
         submitting = false;
+
         document.getElementById("submitBtn").disabled = false;
+
         showError(error.message);
 
     }
 
 }
 
+/* SHOW ERROR */
+
 function showError(message) {
+
     document.getElementById("error").textContent =
         "Error: " + message;
+
 }
 
+/* START */
+
 initTest();
-
-</script>
-
-</body>
-</html>
