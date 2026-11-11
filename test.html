@@ -173,8 +173,13 @@ async function initTest() {
             throw new Error("Exam not found or not published.");
         }
 
-        let timeLeft = 0;
+const duration = Number(exam.duration_minutes);
 
+if (!Number.isInteger(duration) || duration < 1 || duration > 300) {
+    throw new Error("Exam duration galat hai.");
+}
+
+timeLeft = duration * 60;
 document.getElementById("timer").textContent =
     String(Math.floor(timeLeft / 60)).padStart(2, "0") + ":00";
 
