@@ -3,189 +3,131 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ExamHub Admin Panel</title>
+<title>ExamHub Admin</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./config.js"></script>
 
 <style>
 *{box-sizing:border-box}
-body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:#f1f5f9;
-    color:#1e293b;
-}
-header{
-    background:#172554;
-    color:white;
-    padding:16px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:10px;
-}
-button{
-    border:0;
-    padding:11px 16px;
-    border-radius:6px;
-    cursor:pointer;
-    background:#2563eb;
-    color:white;
-    margin:4px;
-}
-button:hover{opacity:.85}
-.logout{background:#dc2626}
-.container{
-    max-width:1000px;
-    margin:20px auto;
-    padding:12px;
-}
-.card{
-    background:white;
-    padding:18px;
-    margin-bottom:20px;
-    border-radius:10px;
-    box-shadow:0 2px 8px #0001;
-}
-input,textarea,select{
-    width:100%;
-    padding:11px;
-    margin:7px 0 14px;
-    border:1px solid #cbd5e1;
-    border-radius:6px;
-    font-size:15px;
-}
+body{margin:0;font-family:Arial;background:#f1f5f9;color:#1e293b}
+header{background:#172554;color:white;padding:16px;display:flex;justify-content:space-between;align-items:center}
+.container{max-width:950px;margin:20px auto;padding:12px}
+.card{background:white;padding:20px;margin-bottom:20px;border-radius:12px;box-shadow:0 2px 8px #0001}
+input,textarea,select{width:100%;padding:12px;margin:7px 0 14px;border:1px solid #cbd5e1;border-radius:7px;font-size:16px}
 textarea{min-height:75px}
-label{font-weight:bold}
-.hidden{display:none!important}
-.item{
-    border:1px solid #ddd;
-    padding:12px;
-    margin:10px 0;
-    border-radius:7px;
-    background:#fafafa;
-}
-#status{
-    padding:14px;
-    background:#fff;
-    border-radius:8px;
-    margin:15px 0;
-    overflow-wrap:anywhere;
-}
-.success{color:green}
-.danger{color:#dc2626}
+button{padding:11px 16px;border:0;border-radius:7px;background:#2563eb;color:white;margin:4px;cursor:pointer}
+.green{background:#15803d}
+.red{background:#dc2626}
+.item{border:1px solid #ddd;padding:14px;margin:12px 0;border-radius:8px;overflow-wrap:anywhere}
+#status{background:white;padding:12px;margin:12px 0;border-radius:7px;overflow-wrap:anywhere}
+.hidden{display:none}
 </style>
 </head>
 
 <body>
 
 <header>
-    <h2>ExamHub Admin Panel</h2>
-    <button class="logout" id="logoutBtn" type="button">Logout</button>
+<h2>ExamHub Admin</h2>
+<button id="logoutBtn" class="red">Logout</button>
 </header>
 
 <div class="container">
 
-    <div id="status">Starting Admin Panel...</div>
+<div id="status">Checking Admin Access...</div>
 
-    <div id="dashboard" class="hidden">
+<div id="adminArea" class="hidden">
 
-        <!-- EXAM MANAGEMENT -->
+<div class="card">
 
-        <div class="card">
-            <h2>Add / Edit Exam</h2>
+<h2>Add / Edit Exam</h2>
 
-            <input type="hidden" id="examId">
+<input type="hidden" id="examId">
 
-            <label>Exam Name</label>
-            <input id="examTitle" placeholder="Enter exam name">
+<label>Exam Name</label>
+<input id="examTitle" placeholder="Exam Name">
 
-            <label>Description</label>
-            <textarea id="examDescription" placeholder="Exam description"></textarea>
+<label>Description</label>
+<textarea id="examDescription"></textarea>
 
-            <label>Class</label>
-            <input id="examClass" placeholder="Class name">
+<label>Class</label>
+<input id="examClass" placeholder="Class">
 
-            <label>Subject</label>
-            <input id="examSubject" placeholder="Subject">
+<label>Subject</label>
+<input id="examSubject" placeholder="Subject">
 
-            <label>Test Duration (Minutes)</label>
-<input
-    id="examDuration"
-    type="number"
-    min="1"
-    max="300"
-    value="30"
-    required
->
+<label>Exam Fee</label>
+<input id="examFee" type="number" min="0" step="0.01" value="0">
 
-            <label>
-                <input type="checkbox" id="examPublished" style="width:auto">
-                Publish Exam
-            </label>
+<label>Exam Duration (Minutes)</label>
+<input id="examDuration" type="number" min="1" max="300" value="30">
 
-            <br><br>
+<label>
+<input type="checkbox" id="examPublished" style="width:auto">
+Publish Exam
+</label>
 
-            <button type="button" id="saveExamBtn">Save Exam</button>
-            <button type="button" id="clearExamBtn">Clear Form</button>
-        </div>
+<br>
 
-        <div class="card">
-            <h2>All Exams</h2>
-            <div id="examList">Loading exams...</div>
-        </div>
+<button id="saveExamBtn">Save Exam</button>
+<button id="clearExamBtn" class="red">Clear Form</button>
 
-        <!-- QUESTION MANAGEMENT -->
+</div>
 
-        <div class="card">
-            <h2>Add / Edit Question</h2>
+<div class="card">
+<h2>All Exams</h2>
+<div id="examList">Loading...</div>
+</div>
 
-            <input type="hidden" id="questionId">
+<div class="card">
 
-            <label>Select Exam</label>
-            <select id="questionExam">
-                <option value="">Select Exam</option>
-            </select>
+<h2>Add / Edit Question</h2>
 
-            <label>Question</label>
-            <textarea id="questionText" placeholder="Write question here"></textarea>
+<input type="hidden" id="questionId">
 
-            <label>Option A</label>
-            <input id="optionA" placeholder="Option A">
+<label>Select Exam</label>
+<select id="questionExam">
+<option value="">Select Exam</option>
+</select>
 
-            <label>Option B</label>
-            <input id="optionB" placeholder="Option B">
+<label>Question</label>
+<textarea id="questionText"></textarea>
 
-            <label>Option C</label>
-            <input id="optionC" placeholder="Option C">
+<label>Option A</label>
+<input id="optionA">
 
-            <label>Option D</label>
-            <input id="optionD" placeholder="Option D">
+<label>Option B</label>
+<input id="optionB">
 
-            <label>Correct Answer</label>
-            <select id="correctOption">
-                <option value="">Select Correct Answer</option>
-                <option value="A">Option A</option>
-                <option value="B">Option B</option>
-                <option value="C">Option C</option>
-                <option value="D">Option D</option>
-            </select>
+<label>Option C</label>
+<input id="optionC">
 
-            <label>Marks</label>
-            <input id="questionMarks" type="number" value="1" min="1">
+<label>Option D</label>
+<input id="optionD">
 
-            <button type="button" id="saveQuestionBtn">Save Question</button>
-            <button type="button" id="newQuestionBtn">+ Add New Question</button>
-        </div>
+<label>Correct Answer</label>
+<select id="correctOption">
+<option value="">Select Answer</option>
+<option value="A">A</option>
+<option value="B">B</option>
+<option value="C">C</option>
+<option value="D">D</option>
+</select>
 
-        <div class="card">
-            <h2>All Questions</h2>
-            <div id="questionList">Select an exam to see questions.</div>
-        </div>
+<label>Marks</label>
+<input id="questionMarks" type="number" min="1" step="0.01" value="1">
 
-    </div>
+<button id="saveQuestionBtn">Save Question</button>
+<button id="clearQuestionBtn" class="red">Clear Question</button>
+
+</div>
+
+<div class="card">
+<h2>All Questions</h2>
+<div id="questionList">Select an Exam.</div>
+</div>
+
+</div>
 </div>
 
 <script>
@@ -193,1008 +135,519 @@ label{font-weight:bold}
 
 const $ = id => document.getElementById(id);
 
-let currentUser = null;
 let exams = [];
+let currentUser = null;
 
-function status(message, type="") {
+/* STATUS */
+
+function status(message){
     $("status").textContent = message;
-    $("status").className = type;
 }
 
-function showError(error) {
+function showError(error){
     console.error(error);
-    status("Error: " + (error.message || String(error)), "danger");
-}
-
-function withTimeout(promise, seconds=20) {
-    return Promise.race([
-        promise,
-        new Promise((_, reject) =>
-            setTimeout(() => reject(
-                new Error("Request timed out. Internet aur Supabase connection check karein.")
-            ), seconds * 1000)
-        )
-    ]);
+    status("Error: " + (error.message || String(error)));
 }
 
 /* ADMIN ACCESS */
 
-async function initAdmin() {
-    try {
-        status("Checking Supabase connection...");
+async function initAdmin(){
 
-        if (!window.supabase) {
+    try{
+
+        if(!window.supabase){
             throw new Error("Supabase library load nahi hui.");
         }
 
-        if (typeof supabaseClient === "undefined") {
-            throw new Error("config.js mein supabaseClient nahi mila.");
+        if(typeof supabaseClient === "undefined"){
+            throw new Error("config.js load nahi hui.");
         }
 
-        status("Checking login session...");
+        const {data:sessionData,error:sessionError} =
+            await supabaseClient.auth.getSession();
 
-        const { data: sessionData, error: sessionError } =
-            await withTimeout(supabaseClient.auth.getSession());
+        if(sessionError) throw sessionError;
 
-        if (sessionError) throw sessionError;
-
-        if (!sessionData.session) {
-            status("Login required. Login page par bheja ja raha hai...");
-
-            setTimeout(() => {
-                window.location.replace("./login.html");
-            }, 1200);
-
+        if(!sessionData.session){
+            location.replace("./login.html");
             return;
         }
 
-        const { data: userData, error: userError } =
-            await withTimeout(supabaseClient.auth.getUser());
+        const {data:userData,error:userError} =
+            await supabaseClient.auth.getUser();
 
-        if (userError) throw userError;
+        if(userError) throw userError;
 
         currentUser = userData.user;
 
-        if (!currentUser) {
-            throw new Error("User session nahi mili. Dobara login karein.");
+        const {data:profile,error:profileError} =
+            await supabaseClient
+            .from("profiles")
+            .select("role")
+            .eq("id",currentUser.id)
+            .maybeSingle();
+
+        if(profileError) throw profileError;
+
+        if(!profile || profile.role !== "admin"){
+            throw new Error("Admin permission nahi hai.");
         }
 
-        status("Checking Admin Permission...");
-
-        const { data: profile, error: profileError } =
-            await withTimeout(
-                supabaseClient
-                    .from("profiles")
-                    .select("role")
-                    .eq("id", currentUser.id)
-                    .maybeSingle()
-            );
-
-        if (profileError) throw profileError;
-
-        if (!profile || profile.role !== "admin") {
-            status("Access Denied: Is account ko Admin permission nahi hai.", "danger");
-            return;
-        }
-
-        $("dashboard").classList.remove("hidden");
-
-        status("Admin Access Verified Successfully!", "success");
+        $("adminArea").classList.remove("hidden");
 
         await loadExams();
 
-    } catch (error) {
+        status("Admin Panel Ready.");
+
+    }catch(error){
         showError(error);
     }
 }
 
 /* LOGOUT */
 
-async function logout() {
-    try {
-        status("Logging out...");
+$("logoutBtn").addEventListener("click",async()=>{
 
-        const { error } = await withTimeout(
-            supabaseClient.auth.signOut()
-        );
+    const {error}=await supabaseClient.auth.signOut();
 
-        if (error) throw error;
-
-        window.location.replace("./login.html");
-
-    } catch (error) {
+    if(error){
         showError(error);
-    }
-}
-
-$("logoutBtn").addEventListener("click", logout);
-
-/* EXAM FORM */
-
-function clearExamForm() {
-    $("examId").value = "";
-    $("examTitle").value = "";
-    $("examDescription").value = "";
-    $("examClass").value = "";
-    $("examSubject").value = "";
-    $("examFee").value = "0";
-$("examDuration").value = "30";
-$("examPublished").checked = false;
-
-async function saveExam() {
-    try {
-        const title = $("examTitle").value.trim();
-
-        if (!title) {
-            alert("Exam name likhein.");
-            return;
-        }
-
-        const duration = Number($("examDuration").value);
-
-if (!Number.isInteger(duration) || duration < 1 || duration > 300) {
-    alert("Timer 1 se 300 minutes ke beech rakhein.");
-    return;
-}
-
-const exam = {
-    title,
-    description: $("examDescription").value.trim(),
-    class_name: $("examClass").value.trim(),
-    subject: $("examSubject").value.trim(),
-    fee,
-    duration_minutes: duration,
-    is_published: $("examPublished").checked
-};
-
-        const exam = {
-            title,
-            description: $("examDescription").value.trim(),
-            class_name: $("examClass").value.trim(),
-            subject: $("examSubject").value.trim(),
-            fee,
-            is_published: $("examPublished").checked
-        };
-
-        const id = $("examId").value;
-
-        let result;
-
-        if (id) {
-            result = await supabaseClient
-                .from("exams")
-                .update(exam)
-                .eq("id", id);
-        } else {
-            result = await supabaseClient
-                .from("exams")
-                .insert(exam);
-        }
-
-        if (result.error) throw result.error;
-
-        alert("Exam Saved Successfully!");
-
-        clearExamForm();
-        await loadExams();
-
-    } catch (error) {
-        showError(error);
-    }
-}
-
-$("saveExamBtn").addEventListener("click", saveExam);
-$("clearExamBtn").addEventListener("click", clearExamForm);
-
-/* LOAD EXAMS */
-
-async function loadExams() {
-    try {
-        status("Loading exams...");
-
-        const { data, error } = await supabaseClient
-            .from("exams")
-            .select("*")
-            .order("created_at", { ascending: false });
-
-        if (error) throw error;
-
-        exams = data || [];
-
-        const list = $("examList");
-        const select = $("questionExam");
-
-        list.innerHTML = "";
-        select.innerHTML = '<option value="">Select Exam</option>';
-
-        if (!exams.length) {
-            list.textContent = "No exams added yet.";
-            return;
-        }
-
-        exams.forEach(exam => {
-            const option = document.createElement("option");
-            option.value = exam.id;
-            option.textContent = exam.title;
-            select.appendChild(option);
-
-            const div = document.createElement("div");
-            div.className = "item";
-
-            const title = document.createElement("strong");
-            title.textContent = exam.title;
-
-            const details = document.createElement("p");
-            details.textContent =
-                "Class: " + (exam.class_name || "-") +
-                " | Subject: " + (exam.subject || "-") +
-                " | Fee: ₹" + exam.fee +
-                " | " + (exam.is_published ? "Published" : "Unpublished");
-
-            const edit = document.createElement("button");
-            edit.textContent = "Edit";
-            edit.addEventListener("click", () => editExam(exam.id));
-
-            const publish = document.createElement("button");
-            publish.textContent = exam.is_published ? "Unpublish" : "Publish";
-            publish.addEventListener("click", () => togglePublish(exam));
-
-            const del = document.createElement("button");
-            del.textContent = "Delete";
-            del.style.background = "#dc2626";
-            del.addEventListener("click", () => deleteExam(exam.id));
-
-            div.append(title, details, edit, publish, del);
-            list.appendChild(div);
-        });
-
-        status("Admin Panel Ready.", "success");
-
-    } catch (error) {
-        showError(error);
-    }
-}
-
-function editExam(id) {
-    const exam = exams.find(e => String(e.id) === String(id));
-    if (!exam) return;
-
-    $("examId").value = exam.id;
-    $("examTitle").value = exam.title || "";
-    $("examDescription").value = exam.description || "";
-    $("examClass").value = exam.class_name || "";
-    $("examSubject").value = exam.subject || "";
-    $("examDuration").value = exam.duration_minutes ?? 30;
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-async function togglePublish(exam) {
-    try {
-        const { error } = await supabaseClient
-            .from("exams")
-            .update({ is_published: !exam.is_published })
-            .eq("id", exam.id);
-
-        if (error) throw error;
-
-        await loadExams();
-
-    } catch (error) {
-        showError(error);
-    }
-}
-
-async function deleteExam(id) {
-    if (!confirm("Kya aap is exam ko delete karna chahte hain?")) return;
-
-    try {
-        const { error } = await supabaseClient
-            .from("exams")
-            .delete()
-            .eq("id", id);
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ExamHub Admin Panel</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="./config.js"></script>
-
-<style>
-*{box-sizing:border-box}
-body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:#f1f5f9;
-    color:#1e293b;
-}
-header{
-    background:#172554;
-    color:white;
-    padding:16px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:10px;
-}
-button{
-    border:0;
-    padding:11px 16px;
-    border-radius:6px;
-    cursor:pointer;
-    background:#2563eb;
-    color:white;
-    margin:4px;
-}
-button:hover{opacity:.85}
-.logout{background:#dc2626}
-.container{
-    max-width:1000px;
-    margin:20px auto;
-    padding:12px;
-}
-.card{
-    background:white;
-    padding:18px;
-    margin-bottom:20px;
-    border-radius:10px;
-    box-shadow:0 2px 8px #0001;
-}
-input,textarea,select{
-    width:100%;
-    padding:11px;
-    margin:7px 0 14px;
-    border:1px solid #cbd5e1;
-    border-radius:6px;
-    font-size:15px;
-}
-textarea{min-height:75px}
-label{font-weight:bold}
-.hidden{display:none!important}
-.item{
-    border:1px solid #ddd;
-    padding:12px;
-    margin:10px 0;
-    border-radius:7px;
-    background:#fafafa;
-}
-#status{
-    padding:14px;
-    background:#fff;
-    border-radius:8px;
-    margin:15px 0;
-    overflow-wrap:anywhere;
-}
-.success{color:green}
-.danger{color:#dc2626}
-</style>
-</head>
-
-<body>
-
-<header>
-    <h2>ExamHub Admin Panel</h2>
-    <button class="logout" id="logoutBtn" type="button">Logout</button>
-</header>
-
-<div class="container">
-
-    <div id="status">Starting Admin Panel...</div>
-
-    <div id="dashboard" class="hidden">
-
-        <!-- EXAM MANAGEMENT -->
-
-        <div class="card">
-            <h2>Add / Edit Exam</h2>
-
-            <input type="hidden" id="examId">
-
-            <label>Exam Name</label>
-            <input id="examTitle" placeholder="Enter exam name">
-
-            <label>Description</label>
-            <textarea id="examDescription" placeholder="Exam description"></textarea>
-
-            <label>Class</label>
-            <input id="examClass" placeholder="Class name">
-
-            <label>Subject</label>
-            <input id="examSubject" placeholder="Subject">
-
-            <label>Test Fee</label>
-            <input id="examFee" type="number" min="0" step="0.01" value="0">
-
-            <label>
-                <input type="checkbox" id="examPublished" style="width:auto">
-                Publish Exam
-            </label>
-
-            <br><br>
-
-            <button type="button" id="saveExamBtn">Save Exam</button>
-            <button type="button" id="clearExamBtn">Clear Form</button>
-        </div>
-
-        <div class="card">
-            <h2>All Exams</h2>
-            <div id="examList">Loading exams...</div>
-        </div>
-
-        <!-- QUESTION MANAGEMENT -->
-
-        <div class="card">
-            <h2>Add / Edit Question</h2>
-
-            <input type="hidden" id="questionId">
-
-            <label>Select Exam</label>
-            <select id="questionExam">
-                <option value="">Select Exam</option>
-            </select>
-
-            <label>Question</label>
-            <textarea id="questionText" placeholder="Write question here"></textarea>
-
-            <label>Option A</label>
-            <input id="optionA" placeholder="Option A">
-
-            <label>Option B</label>
-            <input id="optionB" placeholder="Option B">
-
-            <label>Option C</label>
-            <input id="optionC" placeholder="Option C">
-
-            <label>Option D</label>
-            <input id="optionD" placeholder="Option D">
-
-            <label>Correct Answer</label>
-            <select id="correctOption">
-                <option value="">Select Correct Answer</option>
-                <option value="A">Option A</option>
-                <option value="B">Option B</option>
-                <option value="C">Option C</option>
-                <option value="D">Option D</option>
-            </select>
-
-            <label>Marks</label>
-            <input id="questionMarks" type="number" value="1" min="1">
-
-            <button type="button" id="saveQuestionBtn">Save Question</button>
-            <button type="button" id="newQuestionBtn">+ Add New Question</button>
-        </div>
-
-        <div class="card">
-            <h2>All Questions</h2>
-            <div id="questionList">Select an exam to see questions.</div>
-        </div>
-
-    </div>
-</div>
-
-<script>
-"use strict";
-
-const $ = id => document.getElementById(id);
-
-let currentUser = null;
-let exams = [];
-
-function status(message, type="") {
-    $("status").textContent = message;
-    $("status").className = type;
-}
-
-function showError(error) {
-    console.error(error);
-    status("Error: " + (error.message || String(error)), "danger");
-}
-
-function withTimeout(promise, seconds=20) {
-    return Promise.race([
-        promise,
-        new Promise((_, reject) =>
-            setTimeout(() => reject(
-                new Error("Request timed out. Internet aur Supabase connection check karein.")
-            ), seconds * 1000)
-        )
-    ]);
-}
-
-/* ADMIN ACCESS */
-
-async function initAdmin() {
-    try {
-        status("Checking Supabase connection...");
-
-        if (!window.supabase) {
-            throw new Error("Supabase library load nahi hui.");
-        }
-
-        if (typeof supabaseClient === "undefined") {
-            throw new Error("config.js mein supabaseClient nahi mila.");
-        }
-
-        status("Checking login session...");
-
-        const { data: sessionData, error: sessionError } =
-            await withTimeout(supabaseClient.auth.getSession());
-
-        if (sessionError) throw sessionError;
-
-        if (!sessionData.session) {
-            status("Login required. Login page par bheja ja raha hai...");
-
-            setTimeout(() => {
-                window.location.replace("./login.html");
-            }, 1200);
-
-            return;
-        }
-
-        const { data: userData, error: userError } =
-            await withTimeout(supabaseClient.auth.getUser());
-
-        if (userError) throw userError;
-
-        currentUser = userData.user;
-
-        if (!currentUser) {
-            throw new Error("User session nahi mili. Dobara login karein.");
-        }
-
-        status("Checking Admin Permission...");
-
-        const { data: profile, error: profileError } =
-            await withTimeout(
-                supabaseClient
-                    .from("profiles")
-                    .select("role")
-                    .eq("id", currentUser.id)
-                    .maybeSingle()
-            );
-
-        if (profileError) throw profileError;
-
-        if (!profile || profile.role !== "admin") {
-            status("Access Denied: Is account ko Admin permission nahi hai.", "danger");
-            return;
-        }
-
-        $("dashboard").classList.remove("hidden");
-
-        status("Admin Access Verified Successfully!", "success");
-
-        await loadExams();
-
-    } catch (error) {
-        showError(error);
-    }
-}
-
-/* LOGOUT */
-
-async function logout() {
-    try {
-        status("Logging out...");
-
-        const { error } = await withTimeout(
-            supabaseClient.auth.signOut()
-        );
-
-        if (error) throw error;
-
-        window.location.replace("./login.html");
-
-    } catch (error) {
-        showError(error);
-    }
-}
-
-$("logoutBtn").addEventListener("click", logout);
-
-/* EXAM FORM */
-
-function clearExamForm() {
-    $("examId").value = "";
-    $("examTitle").value = "";
-    $("examDescription").value = "";
-    $("examClass").value = "";
-    $("examSubject").value = "";
-    $("examFee").value = "0";
-    $("examPublished").checked = false;
-}
-
-async function saveExam() {
-    try {
-        const title = $("examTitle").value.trim();
-
-        if (!title) {
-            alert("Exam name likhein.");
-            return;
-        }
-
-        const fee = Number($("examFee").value);
-
-        if (!Number.isFinite(fee) || fee < 0) {
-            alert("Valid fee enter karein.");
-            return;
-        }
-
-        const exam = {
-            title,
-            description: $("examDescription").value.trim(),
-            class_name: $("examClass").value.trim(),
-            subject: $("examSubject").value.trim(),
-            fee,
-            is_published: $("examPublished").checked
-        };
-
-        const id = $("examId").value;
-
-        let result;
-
-        if (id) {
-            result = await supabaseClient
-                .from("exams")
-                .update(exam)
-                .eq("id", id);
-        } else {
-            result = await supabaseClient
-                .from("exams")
-                .insert(exam);
-        }
-
-        if (result.error) throw result.error;
-
-        alert("Exam Saved Successfully!");
-
-        clearExamForm();
-        await loadExams();
-
-    } catch (error) {
-        showError(error);
-    }
-}
-
-$("saveExamBtn").addEventListener("click", saveExam);
-$("clearExamBtn").addEventListener("click", clearExamForm);
-
-/* LOAD EXAMS */
-
-async function loadExams() {
-    try {
-        status("Loading exams...");
-
-        const { data, error } = await supabaseClient
-            .from("exams")
-            .select("*")
-            .order("created_at", { ascending: false });
-
-        if (error) throw error;
-
-        exams = data || [];
-
-        const list = $("examList");
-        const select = $("questionExam");
-
-        list.innerHTML = "";
-        select.innerHTML = '<option value="">Select Exam</option>';
-
-        if (!exams.length) {
-            list.textContent = "No exams added yet.";
-            return;
-        }
-
-        exams.forEach(exam => {
-            const option = document.createElement("option");
-            option.value = exam.id;
-            option.textContent = exam.title;
-            select.appendChild(option);
-
-            const div = document.createElement("div");
-            div.className = "item";
-
-            const title = document.createElement("strong");
-            title.textContent = exam.title;
-
-            const details = document.createElement("p");
-            details.textContent =
-                "Class: " + (exam.class_name || "-") +
-                " | Subject: " + (exam.subject || "-") +
-                " | Fee: ₹" + exam.fee +
-" | Timer: " + (exam.duration_minutes || 30) + " Minutes" +
-" | " + (exam.is_published ? "Published" : "Unpublished");
-
-            const edit = document.createElement("button");
-            edit.textContent = "Edit";
-            edit.addEventListener("click", () => editExam(exam.id));
-
-            const publish = document.createElement("button");
-            publish.textContent = exam.is_published ? "Unpublish" : "Publish";
-            publish.addEventListener("click", () => togglePublish(exam));
-
-            const del = document.createElement("button");
-            del.textContent = "Delete";
-            del.style.background = "#dc2626";
-            del.addEventListener("click", () => deleteExam(exam.id));
-
-            div.append(title, details, edit, publish, del);
-            list.appendChild(div);
-        });
-
-        status("Admin Panel Ready.", "success");
-
-    } catch (error) {
-        showError(error);
-    }
-}
-
-function editExam(id) {
-    const exam = exams.find(e => String(e.id) === String(id));
-    if (!exam) return;
-
-    $("examId").value = exam.id;
-    $("examTitle").value = exam.title || "";
-    $("examDescription").value = exam.description || "";
-    $("examClass").value = exam.class_name || "";
-    $("examSubject").value = exam.subject || "";
-    $("examFee").value = exam.fee ?? 0;
-    $("examPublished").checked = !!exam.is_published;
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-async function togglePublish(exam) {
-    try {
-        const { error } = await supabaseClient
-            .from("exams")
-            .update({ is_published: !exam.is_published })
-            .eq("id", exam.id);
-
-        if (error) throw error;
-
-        await loadExams();
-
-    } catch (error) {
-        showError(error);
-    }
-}
-
-async function deleteExam(id) {
-    if (!confirm("Kya aap is exam ko delete karna chahte hain?")) return;
-
-    try {
-        const { error } = await supabaseClient
-            .from("exams")
-            .delete()
-            .eq("id", id);
-
-        if (error) throw error;
-
-        alert("Exam Deleted.");
-        await loadExams();
-
-    } catch (error) {
-        showError(error);
-    }
-}
-
-/* QUESTION FORM */
-
-function clearQuestionForm(keepExam=true) {
-    const selectedExam = keepExam ? $("questionExam").value : "";
-
-    $("questionId").value = "";
-    $("questionText").value = "";
-    $("optionA").value = "";
-    $("optionB").value = "";
-    $("optionC").value = "";
-    $("optionD").value = "";
-    $("correctOption").value = "";
-    $("questionMarks").value = "1";
-
-    $("questionExam").value = selectedExam;
-
-    $("saveQuestionBtn").textContent = "Save Question";
-}
-
-$("newQuestionBtn").addEventListener("click", () => {
-    clearQuestionForm(true);
-    $("questionText").focus();
-});
-
-/* SAVE QUESTION */
-
-async function saveQuestion() {
-    try {
-        const examId = $("questionExam").value;
-        const questionText = $("questionText").value.trim();
-        const correct = $("correctOption").value;
-
-        if (!examId) {
-            alert("Pehle exam select karein.");
-            return;
-        }
-
-        if (!questionText) {
-            alert("Question likhein.");
-            return;
-        }
-
-        if (!correct) {
-            alert("Correct answer select karein.");
-            return;
-        }
-
-        const marks = Number($("questionMarks").value);
-
-        if (!Number.isFinite(marks) || marks < 1) {
-            alert("Valid marks enter karein.");
-            return;
-        }
-
-        const question = {
-            exam_id: examId,
-            question_text: questionText,
-            option_a: $("optionA").value.trim(),
-            option_b: $("optionB").value.trim(),
-            option_c: $("optionC").value.trim(),
-            option_d: $("optionD").value.trim(),
-            correct_option: correct,
-            marks
-        };
-
-        const id = $("questionId").value;
-
-        let result;
-
-        if (id) {
-            result = await supabaseClient
-                .from("questions")
-                .update(question)
-                .eq("id", id);
-        } else {
-            result = await supabaseClient
-                .from("questions")
-                .insert(question);
-        }
-
-        if (result.error) throw result.error;
-
-        alert("Question Saved Successfully!");
-
-        clearQuestionForm(true);
-        await loadQuestions();
-
-    } catch (error) {
-        showError(error);
-    }
-}
-
-$("saveQuestionBtn").addEventListener("click", saveQuestion);
-
-/* LOAD QUESTIONS */
-
-async function loadQuestions() {
-    try {
-        const examId = $("questionExam").value;
-        const list = $("questionList");
-
-        if (!examId) {
-            list.textContent = "Select an exam to see questions.";
-            return;
-        }
-
-        list.textContent = "Loading questions...";
-
-        const { data, error } = await supabaseClient
-            .from("questions")
-            .select("*")
-            .eq("exam_id", examId)
-            .order("created_at", { ascending: true });
-
-        if (error) throw error;
-
-        list.innerHTML = "";
-
-        if (!data || data.length === 0) {
-            list.textContent = "No questions added for this exam.";
-            return;
-        }
-
-        data.forEach((q, index) => {
-            const div = document.createElement("div");
-            div.className = "item";
-
-            const title = document.createElement("strong");
-            title.textContent = (index + 1) + ". " + q.question_text;
-
-            const details = document.createElement("p");
-            details.textContent =
-                "A: " + q.option_a +
-                " | B: " + q.option_b +
-                " | C: " + q.option_c +
-                " | D: " + q.option_d +
-                " | Correct: " + q.correct_option +
-                " | Marks: " + q.marks;
-
-            const edit = document.createElement("button");
-            edit.textContent = "Edit";
-            edit.addEventListener("click", () => editQuestion(q));
-
-            const del = document.createElement("button");
-            del.textContent = "Delete";
-            del.style.background = "#dc2626";
-            del.addEventListener("click", () => deleteQuestion(q.id));
-
-            div.append(title, details, edit, del);
-            list.appendChild(div);
-        });
-
-    } catch (error) {
-        showError(error);
-    }
-}
-
-    $("questionExam").addEventListener("change", async function () {
-
-    const selectedExam = this.value;
-
-    clearQuestionForm(true);
-
-    this.value = selectedExam;
-
-    if (!selectedExam) {
-        $("questionList").textContent = "Select an exam to see questions.";
         return;
     }
 
-    await loadQuestions();
+    location.replace("./login.html");
+
 });
+
+/* CLEAR EXAM */
+
+function clearExamForm(){
+
+    $("examId").value="";
+    $("examTitle").value="";
+    $("examDescription").value="";
+    $("examClass").value="";
+    $("examSubject").value="";
+    $("examFee").value="0";
+    $("examDuration").value="30";
+    $("examPublished").checked=false;
+
+    $("saveExamBtn").textContent="Save Exam";
+
+}
+
+/* SAVE EXAM */
+
+async function saveExam(){
+
+    try{
+
+        const title=$("examTitle").value.trim();
+
+        const fee=Number($("examFee").value);
+        const duration=Number($("examDuration").value);
+
+        if(!title){
+            throw new Error("Exam Name likhein.");
+        }
+
+        if(!Number.isFinite(fee) || fee<0){
+            throw new Error("Valid Exam Fee likhein.");
+        }
+
+        if(!Number.isInteger(duration) || duration<1 || duration>300){
+            throw new Error("Timer 1 se 300 minutes ke beech hona chahiye.");
+        }
+
+        const examData={
+
+            title:title,
+
+            description:$("examDescription").value.trim(),
+
+            class_name:$("examClass").value.trim(),
+
+            subject:$("examSubject").value.trim(),
+
+            fee:fee,
+
+            duration_minutes:duration,
+
+            is_published:$("examPublished").checked
+
+        };
+
+        const id=$("examId").value;
+
+        status("Saving Exam...");
+
+        let result;
+
+        if(id){
+
+            result=await supabaseClient
+            .from("exams")
+            .update(examData)
+            .eq("id",id);
+
+        }else{
+
+            result=await supabaseClient
+            .from("exams")
+            .insert(examData);
+
+        }
+
+        if(result.error) throw result.error;
+
+        alert("Exam Saved Successfully!");
+
+        clearExamForm();
+
+        await loadExams();
+
+        status("Exam saved successfully.");
+
+    }catch(error){
+        showError(error);
+    }
+
+}
+
+$("saveExamBtn").addEventListener("click",saveExam);
+
+$("clearExamBtn").addEventListener("click",clearExamForm);
+
+/* LOAD EXAMS */
+
+async function loadExams(){
+
+    try{
+
+        const {data,error}=await supabaseClient
+        .from("exams")
+        .select("id,title,description,class_name,subject,fee,duration_minutes,is_published")
+        .order("id",{ascending:false});
+
+        if(error) throw error;
+
+        exams=data || [];
+
+        $("examList").innerHTML="";
+
+        $("questionExam").innerHTML=
+        '<option value="">Select Exam</option>';
+
+        if(exams.length===0){
+            $("examList").textContent="No Exams Found.";
+            return;
+        }
+
+        exams.forEach(exam=>{
+
+            const option=document.createElement("option");
+            option.value=exam.id;
+            option.textContent=exam.title;
+
+            $("questionExam").appendChild(option);
+
+            const box=document.createElement("div");
+            box.className="item";
+
+            const title=document.createElement("h3");
+            title.textContent=exam.title;
+
+            const details=document.createElement("p");
+
+            details.textContent=
+                "Class: "+(exam.class_name || "-")+
+                " | Subject: "+(exam.subject || "-")+
+                " | Fee: ₹"+exam.fee+
+                " | Timer: "+exam.duration_minutes+" Minutes"+
+                " | "+(exam.is_published?"Published":"Unpublished");
+
+            const edit=document.createElement("button");
+            edit.textContent="Edit";
+            edit.addEventListener("click",()=>editExam(exam.id));
+
+            const publish=document.createElement("button");
+            publish.textContent=exam.is_published?"Unpublish":"Publish";
+            publish.className=exam.is_published?"red":"green";
+            publish.addEventListener("click",()=>togglePublish(exam));
+
+            box.append(title,details,edit,publish);
+
+            $("examList").appendChild(box);
+
+        });
+
+    }catch(error){
+        showError(error);
+    }
+
+}
+
+/* EDIT EXAM */
+
+function editExam(id){
+
+    const exam=exams.find(item=>String(item.id)===String(id));
+
+    if(!exam) return;
+
+    $("examId").value=exam.id;
+    $("examTitle").value=exam.title || "";
+    $("examDescription").value=exam.description || "";
+    $("examClass").value=exam.class_name || "";
+    $("examSubject").value=exam.subject || "";
+    $("examFee").value=exam.fee ?? 0;
+    $("examDuration").value=exam.duration_minutes ?? 30;
+    $("examPublished").checked=!!exam.is_published;
+
+    $("saveExamBtn").textContent="Update Exam";
+
+    window.scrollTo({top:0,behavior:"smooth"});
+
+}
+
+/* PUBLISH */
+
+async function togglePublish(exam){
+
+    try{
+
+        const {error}=await supabaseClient
+        .from("exams")
+        .update({is_published:!exam.is_published})
+        .eq("id",exam.id);
+
+        if(error) throw error;
+
+        await loadExams();
+
+    }catch(error){
+        showError(error);
+    }
+
+}
+
+/* CLEAR QUESTION */
+
+function clearQuestionForm(){
+
+    $("questionId").value="";
+    $("questionText").value="";
+    $("optionA").value="";
+    $("optionB").value="";
+    $("optionC").value="";
+    $("optionD").value="";
+    $("correctOption").value="";
+    $("questionMarks").value="1";
+
+    $("saveQuestionBtn").textContent="Save Question";
+
+}
+
+/* SAVE QUESTION */
+
+async function saveQuestion(){
+
+    try{
+
+        const examId=$("questionExam").value;
+
+        if(!examId){
+            throw new Error("Exam Select Karein.");
+        }
+
+        const questionText=$("questionText").value.trim();
+
+        const correct=$("correctOption").value;
+
+        const marks=Number($("questionMarks").value);
+
+        if(!questionText){
+            throw new Error("Question likhein.");
+        }
+
+        const a=$("optionA").value.trim();
+        const b=$("optionB").value.trim();
+        const c=$("optionC").value.trim();
+        const d=$("optionD").value.trim();
+
+        if(!a || !b || !c || !d){
+            throw new Error("Charo options bharein.");
+        }
+
+        if(!["A","B","C","D"].includes(correct)){
+            throw new Error("Correct Answer select karein.");
+        }
+
+        if(!Number.isFinite(marks) || marks<1){
+            throw new Error("Valid marks likhein.");
+        }
+
+        const question={
+
+            exam_id:Number(examId),
+            question_text:questionText,
+            option_a:a,
+            option_b:b,
+            option_c:c,
+            option_d:d,
+            correct_option:correct,
+            marks:marks
+
+        };
+
+        const id=$("questionId").value;
+
+        let result;
+
+        if(id){
+
+            result=await supabaseClient
+            .from("questions")
+            .update(question)
+            .eq("id",id);
+
+        }else{
+
+            result=await supabaseClient
+            .from("questions")
+            .insert(question);
+
+        }
+
+        if(result.error) throw result.error;
+
+        alert("Question Saved Successfully!");
+
+        clearQuestionForm();
+
+        await loadQuestions();
+
+    }catch(error){
+        showError(error);
+    }
+
+}
+
+$("saveQuestionBtn").addEventListener("click",saveQuestion);
+
+$("clearQuestionBtn").addEventListener("click",clearQuestionForm);
+
+/* LOAD QUESTIONS */
+
+async function loadQuestions(){
+
+    try{
+
+        const examId=$("questionExam").value;
+
+        if(!examId){
+            $("questionList").textContent="Select an Exam.";
+            return;
+        }
+
+        const {data,error}=await supabaseClient
+        .from("questions")
+        .select("*")
+        .eq("exam_id",Number(examId))
+        .order("id",{ascending:true});
+
+        if(error) throw error;
+
+        $("questionList").innerHTML="";
+
+        if(!data || data.length===0){
+            $("questionList").textContent="No Questions Found.";
+            return;
+        }
+
+        data.forEach((q,index)=>{
+
+            const box=document.createElement("div");
+            box.className="item";
+
+            const heading=document.createElement("h3");
+            heading.textContent=(index+1)+". "+q.question_text;
+
+            const details=document.createElement("p");
+            details.textContent=
+                "A: "+q.option_a+
+                " | B: "+q.option_b+
+                " | C: "+q.option_c+
+                " | D: "+q.option_d+
+                " | Correct: "+q.correct_option+
+                " | Marks: "+q.marks;
+
+            const edit=document.createElement("button");
+            edit.textContent="Edit";
+            edit.addEventListener("click",()=>editQuestion(q));
+
+            const del=document.createElement("button");
+            del.textContent="Delete Question";
+            del.className="red";
+            del.addEventListener("click",()=>deleteQuestion(q.id));
+
+            box.append(heading,details,edit,del);
+
+            $("questionList").appendChild(box);
+
+        });
+
+    }catch(error){
+        showError(error);
+    }
+
+}
+
+$("questionExam").addEventListener("change",loadQuestions);
 
 /* EDIT QUESTION */
 
-function editQuestion(q) {
-    $("questionId").value = q.id;
-    $("questionExam").value = q.exam_id;
-    $("questionText").value = q.question_text || "";
-    $("optionA").value = q.option_a || "";
-    $("optionB").value = q.option_b || "";
-    $("optionC").value = q.option_c || "";
-    $("optionD").value = q.option_d || "";
-    $("correctOption").value = q.correct_option || "";
-    $("questionMarks").value = q.marks || 1;
+function editQuestion(q){
 
-    $("saveQuestionBtn").textContent = "Update Question";
+    $("questionId").value=q.id;
+    $("questionText").value=q.question_text || "";
+    $("optionA").value=q.option_a || "";
+    $("optionB").value=q.option_b || "";
+    $("optionC").value=q.option_c || "";
+    $("optionD").value=q.option_d || "";
+    $("correctOption").value=q.correct_option || "";
+    $("questionMarks").value=q.marks || 1;
 
-    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    $("saveQuestionBtn").textContent="Update Question";
+
+    window.scrollTo({
+        top:document.body.scrollHeight,
+        behavior:"smooth"
+    });
+
 }
 
 /* DELETE QUESTION */
 
-async function deleteQuestion(id) {
-    if (!confirm("Kya aap is question ko delete karna chahte hain?")) return;
+async function deleteQuestion(id){
 
-    try {
-        const { error } = await supabaseClient
-            .from("questions")
-            .delete()
-            .eq("id", id);
+    if(!confirm("Question delete karna chahte hain?")) return;
 
-        if (error) throw error;
+    try{
 
-        alert("Question Deleted Successfully!");
+        const {error}=await supabaseClient
+        .from("questions")
+        .delete()
+        .eq("id",id);
+
+        if(error) throw error;
+
         await loadQuestions();
 
-    } catch (error) {
+    }catch(error){
         showError(error);
     }
+
 }
 
 /* START */
@@ -1204,114 +657,4 @@ initAdmin();
 </script>
 
 </body>
-</html>        if (error) throw error;
-
-        alert("Exam Deleted.");
-        await loadExams();
-
-    } catch (error) {
-        showError(error);
-    }
-}
-
-/* QUESTION FORM */
-
-function clearQuestionForm(keepExam=true) {
-    const selectedExam = keepExam ? $("questionExam").value : "";
-
-    $("questionId").value = "";
-    $("questionText").value = "";
-    $("optionA").value = "";
-    $("optionB").value = "";
-    $("optionC").value = "";
-    $("optionD").value = "";
-    $("correctOption").value = "";
-    $("questionMarks").value = "1";
-
-    $("questionExam").value = selectedExam;
-
-    $("saveQuestionBtn").textContent = "Save Question";
-}
-
-$("newQuestionBtn").addEventListener("click", () => {
-    clearQuestionForm(true);
-    $("questionText").focus();
-});
-
-/* SAVE QUESTION */
-
-async function saveQuestion() {
-    try {
-        const examId = $("questionExam").value;
-        const questionText = $("questionText").value.trim();
-        const correct = $("correctOption").value;
-
-        if (!examId) {
-            alert("Pehle exam select karein.");
-            return;
-        }
-
-        if (!questionText) {
-            alert("Question likhein.");
-            return;
-        }
-
-        if (!correct) {
-            alert("Correct answer select karein.");
-            return;
-        }
-
-        const marks = Number($("questionMarks").value);
-
-        if (!Number.isFinite(marks) || marks < 1) {
-            alert("Valid marks enter karein.");
-            return;
-        }
-
-        const question = {
-            exam_id: examId,
-            question_text: questionText,
-            option_a: $("optionA").value.trim(),
-            option_b: $("optionB").value.trim(),
-            option_c: $("optionC").value.trim(),
-            option_d: $("optionD").value.trim(),
-            correct_option: correct,
-            marks
-        };
-
-        const id = $("questionId").value;
-
-        let result;
-
-        if (id) {
-            result = await supabaseClient
-                .from("questions")
-                .update(question)
-                .eq("id", id);
-        } else {
-            result = await supabaseClient
-                .from("questions")
-                .insert(question);
-        }
-
-        if (result.error) throw result.error;
-
-        alert("Question Saved Successfully!");
-
-        clearQuestionForm(true);
-        await loadQuestions();
-
-    } catch (error) {
-        showError(error);
-    }
-}
-
-$("saveQuestionBtn").addEventListener("click", saveQuestion);
-
-/* LOAD QUESTIONS */
-
-async function loadQuestions() {
-    try {
-        const examId = $("questionExam").value;
-
-    
+    </html>
