@@ -136,7 +136,7 @@ button:disabled {
 let examId = new URLSearchParams(location.search).get("exam");
 let questions = [];
 let answers = {};
-let currentIndex = 0;
+let timeLeft = 0;
 let timeLeft = 30 * 60;
 let timerInterval = null;
 let submitting = false;
