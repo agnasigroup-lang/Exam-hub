@@ -212,13 +212,13 @@ if (!orderData || !orderData.order_id ||
     !orderData.key_id || !orderData.amount) {
 
     alert(
-        "Razorpay Server Response:\n" +
+        "SERVER RESPONSE:\n" +
         JSON.stringify(orderData, null, 2)
     );
 
-    throw new Error(
-        orderData?.error || "Order create nahi hua."
-    );
+    button.disabled = false;
+    button.textContent = "Pay Now";
+    return;
 }
         const options = {
             key: orderData.key_id,
