@@ -203,15 +203,23 @@ async function payForExam(exam, button) {
                 }
             );
 
-        if (orderError) throw orderError;
+        if (orderError) {
+    alert("Function Error: " + orderError.message);
+    throw orderError;
+}
 
-        if (!orderData || !orderData.order_id ||
-            !orderData.key_id || !orderData.amount) {
-            throw new Error(
-                orderData?.error || "Order create nahi hua."
-            );
-        }
+if (!orderData || !orderData.order_id ||
+    !orderData.key_id || !orderData.amount) {
 
+    alert(
+        "Razorpay Server Response:\n" +
+        JSON.stringify(orderData, null, 2)
+    );
+
+    throw new Error(
+        orderData?.error || "Order create nahi hua."
+    );
+}
         const options = {
             key: orderData.key_id,
             amount: orderData.amount,
