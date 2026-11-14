@@ -1,61 +1,356 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ExamHub</title>
-<style>
-body{font-family:Arial;background:#f4f6fb;margin:0;color:#172554}
-header{background:white;padding:20px;display:flex;justify-content:space-between}
-a{color:#2563eb;text-decoration:none;margin:8px}
-.hero{text-align:center;background:#2563eb;color:white;padding:40px 15px}
-.container{max-width:800px;margin:auto;padding:20px}
-.card{background:white;padding:20px;margin:15px 0;border-radius:12px}
-button{background:#2563eb;color:white;border:0;padding:12px 22px;border-radius:7px}
-</style>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Exam Hub - Online Mock Tests, Practice Tests & Exam Preparation</title>
+
+    <meta name="description"
+    content="Welcome to Exam Hub. Take online mock tests, practice tests and exam preparation quizzes. Attempt questions, track your performance and check your results online.">
+
+    <meta name="keywords"
+    content="Exam Hub, ExamHub, Exam Hub Online Test, Online Mock Test, Online Practice Test, Exam Preparation, Online Exam, Mock Test, Test Series">
+
+    <meta name="robots" content="index, follow">
+
+    <link rel="canonical"
+    href="https://agnasigroup-lang.github.io/Exam-hub/">
+
+    <meta name="author" content="Exam Hub">
+
+    <meta property="og:title"
+    content="Exam Hub - Online Mock Tests & Exam Preparation">
+
+    <meta property="og:description"
+    content="Practice online tests, attempt mock exams and check your results with Exam Hub.">
+
+    <meta property="og:url"
+    content="https://agnasigroup-lang.github.io/Exam-hub/">
+
+    <meta property="og:type" content="website">
+
+    <meta property="og:site_name" content="Exam Hub">
+
+    <meta name="theme-color" content="#123c8c">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Exam Hub",
+      "alternateName": "ExamHub",
+      "url": "https://agnasigroup-lang.github.io/Exam-hub/",
+      "description": "Online mock tests, practice tests and exam preparation platform."
+    }
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fc;
+            color: #222;
+            line-height: 1.6;
+        }
+
+        header {
+            background: #123c8c;
+            color: white;
+            padding: 18px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 27px;
+            font-weight: bold;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 18px;
+            font-weight: bold;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 75px 20px;
+            background: linear-gradient(135deg, #123c8c, #2875dc);
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 38px;
+            margin-bottom: 15px;
+        }
+
+        .hero p {
+            max-width: 750px;
+            margin: auto;
+            font-size: 18px;
+        }
+
+        .buttons {
+            margin-top: 28px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            margin: 7px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #123c8c;
+        }
+
+        .btn-secondary {
+            background: #ffca28;
+            color: #222;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            padding: 45px 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 29px;
+            color: #123c8c;
+            margin-bottom: 25px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.07);
+        }
+
+        .card h3 {
+            color: #123c8c;
+            margin-bottom: 10px;
+        }
+
+        .about {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 25px;
+        }
+
+        .about h2 {
+            color: #123c8c;
+            margin-bottom: 12px;
+        }
+
+        .about p {
+            margin-bottom: 12px;
+        }
+
+        .cta {
+            text-align: center;
+            background: #e6efff;
+            padding: 40px 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+
+        footer {
+            background: #102c60;
+            color: white;
+            text-align: center;
+            padding: 25px 15px;
+        }
+
+        footer a {
+            color: white;
+            margin: 0 8px;
+        }
+
+        @media(max-width: 600px) {
+            header {
+                justify-content: center;
+                text-align: center;
+            }
+
+            nav a {
+                margin: 7px;
+                display: inline-block;
+            }
+
+            .hero h1 {
+                font-size: 29px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
 <header>
-<b>ExamHub</b>
-<nav>
-<a href="./index.html">Home</a>
-<a href="./login.html">Login</a>
-<a href="./signup.html">Signup</a>
-</nav>
+
+    <div class="logo">📚 Exam Hub</div>
+
+    <nav>
+        <a href="./index.html">Home</a>
+        <a href="./login.html">Login</a>
+        <a href="./signup.html">Sign Up</a>
+    </nav>
+
 </header>
 
-<div class="hero">
-<h1>Welcome to ExamHub</h1>
-<p>अपनी परीक्षा की तैयारी करें।</p>
-</div>
+<section class="hero">
 
-<div class="container">
+    <h1>Welcome to Exam Hub</h1>
 
-<div class="card">
-<h3>General Knowledge</h3>
-<p>10 Questions | Free</p>
-<a href="./test.html?exam=gk">
-<button>Start Test</button>
-</a>
-</div>
+    <p>
+        Your Online Mock Test and Exam Preparation Platform.
+        Practice questions, attempt online tests and check your
+        performance with Exam Hub.
+    </p>
 
-<div class="card">
-<h3>Mathematics Mock Test</h3>
-<p>20 Questions | ₹49</p>
-<button onclick="alert('Payment Gateway अभी Connect नहीं है।')">
-View Test
-</button>
-</div>
+    <div class="buttons">
 
-<div class="card">
-<h3>Science Mock Test</h3>
-<p>25 Questions | ₹29</p>
-<button onclick="alert('Payment Gateway अभी Connect नहीं है।')">
-View Test
-</button>
-</div>
+        <a href="./signup.html" class="btn btn-secondary">
+            Get Started
+        </a>
 
-</div>
+        <a href="./login.html" class="btn btn-primary">
+            Login to Account
+        </a>
+
+    </div>
+
+</section>
+
+<main class="container">
+
+    <h2 class="section-title">
+        Online Mock Tests & Practice Tests
+    </h2>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>📝 Online Tests</h3>
+            <p>
+                Attempt online exams and practice tests
+                through the Exam Hub platform.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>📖 Exam Preparation</h3>
+            <p>
+                Practice questions to improve your
+                understanding and exam preparation.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>⏱️ Timed Tests</h3>
+            <p>
+                Attempt tests with a timer and practise
+                managing your exam time.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>📊 Online Results</h3>
+            <p>
+                Check your test scores and review
+                your performance after completing a test.
+            </p>
+        </div>
+
+    </div>
+
+    <section class="about">
+
+        <h2>About Exam Hub</h2>
+
+        <p>
+            Exam Hub is an online test platform designed
+            for students who want to practise through
+            online mock tests and practice examinations.
+        </p>
+
+        <p>
+            Students can create an account, log in,
+            explore available exams, attempt questions
+            and view their test results.
+        </p>
+
+        <p>
+            Whether you are looking for an online mock test,
+            practice test or an exam preparation platform,
+            Exam Hub provides a place to practise online.
+        </p>
+
+    </section>
+
+    <section class="cta">
+
+        <h2>Start Your Online Test Journey</h2>
+
+        <p>
+            Create your Exam Hub account and explore
+            available online tests.
+        </p>
+
+        <div class="buttons">
+
+            <a href="./signup.html" class="btn btn-secondary">
+                Create Free Account
+            </a>
+
+            <a href="./login.html" class="btn btn-primary">
+                Login
+            </a>
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+
+    <h2>Exam Hub</h2>
+
+    <p>Online Mock Tests | Practice Tests | Exam Preparation</p>
+
+    <p>© 2026 Exam Hub. All Rights Reserved.</p>
+
+</footer>
+
 </body>
 </html>
