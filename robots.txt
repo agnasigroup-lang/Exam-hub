@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://agnasigroup-lang.github.io/Exam-hub/sitemap.xml
