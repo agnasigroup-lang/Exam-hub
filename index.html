@@ -1,76 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>SIGME TEST - Online Mock Tests & Exam Preparation</title>
 
-<meta name="description"
-content="SIGME TEST पर Online Mock Tests, Practice Tests और Exam Preparation की सुविधा प्राप्त करें।">
-
-<meta name="keywords"
-content="SIGME TEST, Online Test, Mock Test, Exam Preparation, Practice Test">
-    <head>
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>sigmetest- Online Mock Tests, Practice Tests & Exam Preparation</title>
-
     <meta name="description"
-    content="Welcome to Exam Hub. Take online mock tests, practice tests and exam preparation quizzes. Attempt questions, track your performance and check your results online.">
+    content="SIGME TEST is an online exam preparation platform offering mock tests, practice tests and online exam results.">
 
     <meta name="keywords"
-    content="sigmetest, sigmetest, sigmetest, Online Mock Test, Online Practice Test, Exam Preparation, Online Exam, Mock Test, Test Series">
+    content="SIGME TEST, Online Mock Test, Online Exam, Practice Test, Exam Preparation">
+
     <meta name="robots" content="index, follow">
 
-    <link rel="canonical"
-    href="https://agnasigroup-lang.github.io/sigmetest/">
+    <link rel="canonical" href="https://sigmetest.com/">
 
-    <meta name="author" content="sigmetest">
-
-    <meta property="og:title"
-    content="sigmetest - Online Mock Tests & Exam Preparation">
-
+    <meta property="og:title" content="SIGME TEST - Online Exam Platform">
     <meta property="og:description"
-    content="Practice online tests, attempt mock exams and check your results with Exam Hub.">
-
-    <meta property="og:url"
-    content="https://agnasigroup-lang.github.io/sigmetest/">
-
+    content="Practice better and prepare for your exams with SIGME TEST.">
     <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sigmetest.com/">
+    <meta property="og:image" content="https://sigmetest.com/sigme-logo.png">
 
-    <meta property="og:site_name" content="sigme test">
+    <meta name="theme-color" content="#07152e">
 
-    <meta name="theme-color" content="#123c8c">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "sigmetest",
-      "alternateName": "sigmetest",
-      "url": "https://agnasigroup-lang.github.io/sigmetest/",
-      "description": "Online mock tests, practice tests and exam preparation platform."
-    }
-    </script>
-<div class="brand-logo">
-    <img src="./sigme-logo.png"
-         alt="SIGME TEST Logo">
-</div>
-
-<style>
-.brand-logo {
-    width: 100%;
-    text-align: center;
-    margin: 20px auto;
-}
-
-.brand-logo img {
-    width: 100%;
-    max-width: 900px;
-    height: auto;
-    border-radius: 12px;
-}
-</style>
     <style>
         * {
             margin: 0;
@@ -81,38 +35,66 @@ content="SIGME TEST, Online Test, Mock Test, Exam Preparation, Practice Test">
         body {
             font-family: Arial, sans-serif;
             background: #f4f7fc;
-            color: #222;
-            line-height: 1.6;
+            color: #172033;
         }
 
         header {
-            background: #123c8c;
+            background: #07152e;
             color: white;
-            padding: 18px 7%;
+            padding: 15px 7%;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 15px;
         }
 
-        .logo {
-            font-size: 27px;
+        .brand {
+            font-size: 25px;
             font-weight: bold;
+            color: #fff;
+        }
+
+        .brand span {
+            color: #ffc629;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 22px;
         }
 
         nav a {
             color: white;
             text-decoration: none;
-            margin-left: 18px;
+            font-size: 15px;
+        }
+
+        nav a:hover {
+            color: #ffc629;
+        }
+
+        .nav-button {
+            background: #ffc629;
+            color: #07152e !important;
+            padding: 10px 18px;
+            border-radius: 7px;
             font-weight: bold;
         }
 
         .hero {
-            text-align: center;
-            padding: 75px 20px;
-            background: linear-gradient(135deg, #123c8c, #2875dc);
+            background: linear-gradient(135deg, #06132b, #092b64);
             color: white;
+            text-align: center;
+            padding: 55px 20px 65px;
+        }
+
+        .hero img {
+            width: 100%;
+            max-width: 850px;
+            height: auto;
+            border-radius: 12px;
+            margin-bottom: 25px;
         }
 
         .hero h1 {
@@ -120,19 +102,25 @@ content="SIGME TEST, Online Test, Mock Test, Exam Preparation, Practice Test">
             margin-bottom: 15px;
         }
 
-        .hero p {
-            max-width: 750px;
-            margin: auto;
-            font-size: 18px;
+        .hero h1 span {
+            color: #ffc629;
         }
 
-        .buttons {
+        .hero p {
+            font-size: 17px;
+            line-height: 1.7;
+            max-width: 700px;
+            margin: auto;
+            color: #dce7ff;
+        }
+
+        .hero-buttons {
             margin-top: 28px;
         }
 
         .btn {
             display: inline-block;
-            padding: 12px 25px;
+            padding: 14px 25px;
             margin: 7px;
             border-radius: 7px;
             text-decoration: none;
@@ -140,242 +128,384 @@ content="SIGME TEST, Online Test, Mock Test, Exam Preparation, Practice Test">
         }
 
         .btn-primary {
-            background: white;
-            color: #123c8c;
+            background: #ffc629;
+            color: #07152e;
         }
 
         .btn-secondary {
-            background: #ffca28;
-            color: #222;
+            border: 2px solid white;
+            color: white;
         }
 
-        .container {
-            max-width: 1100px;
-            margin: auto;
-            padding: 45px 20px;
-        }
-
-        .section-title {
+        .section {
+            padding: 65px 7%;
             text-align: center;
-            font-size: 29px;
-            color: #123c8c;
-            margin-bottom: 25px;
         }
 
-        .cards {
+        .section h2 {
+            font-size: 30px;
+            margin-bottom: 15px;
+            color: #07152e;
+        }
+
+        .section-description {
+            color: #667085;
+            line-height: 1.7;
+            max-width: 700px;
+            margin: 0 auto 35px;
+        }
+
+        .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
         }
 
-        .card {
+        .feature-card {
             background: white;
-            padding: 25px;
+            padding: 28px 18px;
             border-radius: 12px;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.07);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.06);
         }
 
-        .card h3 {
-            color: #123c8c;
+        .feature-icon {
+            font-size: 38px;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            color: #07152e;
             margin-bottom: 10px;
         }
 
-        .about {
+        .feature-card p {
+            color: #667085;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .steps {
+            background: #eaf0fb;
+        }
+
+        .step-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .step {
             background: white;
+            padding: 25px;
             border-radius: 12px;
-            padding: 30px;
-            margin-top: 25px;
         }
 
-        .about h2 {
-            color: #123c8c;
-            margin-bottom: 12px;
+        .step-number {
+            background: #07152e;
+            color: #ffc629;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            font-size: 20px;
+            font-weight: bold;
         }
 
-        .about p {
-            margin-bottom: 12px;
+        .step p {
+            color: #667085;
+            margin-top: 10px;
+            line-height: 1.6;
         }
 
         .cta {
+            background: #07152e;
+            color: white;
+            padding: 60px 20px;
             text-align: center;
-            background: #e6efff;
-            padding: 40px 20px;
-            border-radius: 12px;
-            margin-top: 30px;
+        }
+
+        .cta h2 {
+            font-size: 30px;
+            margin-bottom: 15px;
+        }
+
+        .cta p {
+            color: #dce7ff;
+            margin-bottom: 20px;
+            line-height: 1.6;
         }
 
         footer {
-            background: #102c60;
+            background: #030b1a;
             color: white;
+            padding: 30px 7%;
             text-align: center;
-            padding: 25px 15px;
+        }
+
+        footer p {
+            color: #bdc9dc;
+            margin: 10px 0;
+            font-size: 14px;
         }
 
         footer a {
-            color: white;
+            color: #ffc629;
+            text-decoration: none;
             margin: 0 8px;
         }
 
-        @media(max-width: 600px) {
-            header {
-                justify-content: center;
-                text-align: center;
+        @media(max-width: 800px) {
+            .features {
+                grid-template-columns: repeat(2, 1fr);
             }
 
-            nav a {
-                margin: 7px;
-                display: inline-block;
+            .step-list {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                justify-content: center;
+                gap: 15px;
+            }
+
+            nav {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+        }
+
+        @media(max-width: 500px) {
+            .features {
+                grid-template-columns: 1fr;
             }
 
             .hero h1 {
                 font-size: 29px;
             }
 
-            .hero p {
-                font-size: 16px;
+            .section h2 {
+                font-size: 25px;
+            }
+
+            nav a {
+                font-size: 13px;
             }
         }
     </style>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "SIGME TEST",
+      "url": "https://sigmetest.com/",
+      "description": "Online mock tests and exam preparation platform."
+    }
+    </script>
+
 </head>
 
 <body>
 
+<!-- HEADER -->
+
 <header>
 
-    <div class="logo">📚 sigmetest</div>
+    <div class="brand">
+        SIGME <span>TEST</span>
+    </div>
 
     <nav>
         <a href="./index.html">Home</a>
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
         <a href="./login.html">Login</a>
-        <a href="./signup.html">Sign Up</a>
+        <a href="./signup.html" class="nav-button">Sign Up</a>
     </nav>
 
 </header>
 
+
+<!-- HERO SECTION -->
+
 <section class="hero">
 
-    <h1>Welcome to sigmetest</h1>
+    <img src="./sigme-logo.png"
+         alt="SIGME TEST Logo">
+
+    <h1>Welcome to <span>SIGME TEST</span></h1>
 
     <p>
-        Your Online Mock Test and Exam Preparation Platform.
-        Practice questions, attempt online tests and check your
-        performance with sigmetest.
+        Your Success, Our Mission.
+        Prepare for your exams with online mock tests,
+        practice questions and test results.
     </p>
 
-    <div class="buttons">
+    <div class="hero-buttons">
 
-        <a href="./signup.html" class="btn btn-secondary">
-            Get Started
+        <a href="./signup.html" class="btn btn-primary">
+            Create Account
         </a>
 
-        <a href="./login.html" class="btn btn-primary">
-            Login to Account
+        <a href="./login.html" class="btn btn-secondary">
+            Login Now
         </a>
 
     </div>
 
 </section>
 
-<main class="container">
 
-    <h2 class="section-title">
-        Online Mock Tests & Practice Tests
-    </h2>
+<!-- FEATURES -->
 
-    <div class="cards">
+<section class="section" id="features">
 
-        <div class="card">
-            <h3>📝 Online Tests</h3>
+    <h2>Why Choose SIGME TEST?</h2>
+
+    <p class="section-description">
+        Practice with online tests and track your performance
+        through your test results.
+    </p>
+
+    <div class="features">
+
+        <div class="feature-card">
+            <div class="feature-icon">📝</div>
+            <h3>Online Mock Tests</h3>
             <p>
-                Attempt online exams and practice tests
-                through the sigme test platform.
+                Attempt online tests to practice your exam preparation.
             </p>
         </div>
 
-        <div class="card">
-            <h3>📖 Exam Preparation</h3>
+        <div class="feature-card">
+            <div class="feature-icon">⏱️</div>
+            <h3>Timed Tests</h3>
             <p>
-                Practice questions to improve your
-                understanding and exam preparation.
+                Attempt tests with a timer and manage your time.
             </p>
         </div>
 
-        <div class="card">
-            <h3>⏱️ Timed Tests</h3>
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Test Results</h3>
             <p>
-                Attempt tests with a timer and practise
-                managing your exam time.
+                Check your performance after submitting your test.
             </p>
         </div>
 
-        <div class="card">
-            <h3>📊 Online Results</h3>
+        <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <h3>Better Practice</h3>
             <p>
-                Check your test scores and review
-                your performance after completing a test.
+                Improve your preparation with regular practice.
             </p>
         </div>
 
     </div>
 
-    <section class="about">
+</section>
 
-        <h2>About sigme test</h2>
 
-        <p>
-            sigme test is an online test platform designed
-            for students who want to practise through
-            online mock tests and practice examinations.
-        </p>
+<!-- HOW IT WORKS -->
 
-        <p>
-            Students can create an account, log in,
-            explore available exams, attempt questions
-            and view their test results.
-        </p>
+<section class="section steps" id="how-it-works">
 
-        <p>
-            Whether you are looking for an online mock test,
-            practice test or an exam preparation platform,
-            sigme test provides a place to practise online.
-        </p>
+    <h2>How SIGME TEST Works</h2>
 
-    </section>
+    <p class="section-description">
+        Start your online test journey in three simple steps.
+    </p>
 
-    <section class="cta">
+    <div class="step-list">
 
-        <h2>Start Your Online Test Journey</h2>
+        <div class="step">
 
-        <p>
-            Create your sigme test account and explore
-            available online tests.
-        </p>
+            <div class="step-number">1</div>
 
-        <div class="buttons">
+            <h3>Create Your Account</h3>
 
-            <a href="./signup.html" class="btn btn-secondary">
-                Create Free Account
-            </a>
-
-            <a href="./login.html" class="btn btn-primary">
-                Login
-            </a>
+            <p>
+                Register on SIGME TEST to access your account.
+            </p>
 
         </div>
 
-    </section>
+        <div class="step">
 
-</main>
+            <div class="step-number">2</div>
+
+            <h3>Select Your Test</h3>
+
+            <p>
+                Choose an available exam and start your test.
+            </p>
+
+        </div>
+
+        <div class="step">
+
+            <div class="step-number">3</div>
+
+            <h3>Check Your Result</h3>
+
+            <p>
+                Submit your test and check your performance.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- CALL TO ACTION -->
+
+<section class="cta">
+
+    <h2>Start Your Preparation Today!</h2>
+
+    <p>
+        Create your SIGME TEST account and begin practicing.
+    </p>
+
+    <a href="./signup.html" class="btn btn-primary">
+        Get Started
+    </a>
+
+</section>
+
+
+<!-- FOOTER -->
 
 <footer>
 
-    <h2>sigme test</h2>
+    <h2>SIGME TEST</h2>
 
-    <p>Online Mock Tests | Practice Tests | Exam Preparation</p>
+    <p>Your Success, Our Mission</p>
 
-    <p>© 2026 sigme test. All Rights Reserved.</p>
+    <p>
+        <a href="./index.html">Home</a>
+        <a href="./login.html">Login</a>
+        <a href="./signup.html">Sign Up</a>
+    </p>
+
+    <p>
+        © <span id="year"></span> SIGME TEST.
+        All Rights Reserved.
+    </p>
 
 </footer>
+
+
+<script>
+    document.getElementById("year").textContent =
+        new Date().getFullYear();
+</script>
 
 </body>
 </html>
