@@ -3,758 +3,194 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ExamHub Admin V5 Diagnostic</title>
-<script>window.__ADMIN_JS_EARLY_TEST=true;document.documentElement.setAttribute("data-js","enabled");</script>
-
-<!-- Supabase and config are loaded by the diagnostic bootstrap below -->
-
+<title>ExamHub Admin</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial;background:#f1f5f9;color:#1e293b}
-header{background:#172554;color:white;padding:16px;display:flex;justify-content:space-between;align-items:center}
-.container{max-width:950px;margin:20px auto;padding:12px}
-.card{background:white;padding:20px;margin-bottom:20px;border-radius:12px;box-shadow:0 2px 8px #0001}
-input,textarea,select{width:100%;padding:12px;margin:7px 0 14px;border:1px solid #cbd5e1;border-radius:7px;font-size:16px}
-textarea{min-height:75px}
-select[multiple]{min-height:140px}
-small{display:block;color:#64748b;margin:-8px 0 12px}
-button{padding:11px 16px;border:0;border-radius:7px;background:#2563eb;color:white;margin:4px;cursor:pointer}
-.green{background:#15803d}
-.red{background:#dc2626}
-.item{border:1px solid #ddd;padding:14px;margin:12px 0;border-radius:8px;overflow-wrap:anywhere}
-#status{background:white;padding:12px;margin:12px 0;border-radius:7px;overflow-wrap:anywhere}
-.hidden{display:none}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9;color:#1e293b}
+header{background:#172554;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+header h2{margin:0;font-size:20px}.container{max-width:950px;margin:16px auto;padding:12px}
+.card{background:#fff;padding:18px;margin-bottom:18px;border-radius:12px;box-shadow:0 2px 8px #0001}
+label{display:block;margin:10px 0 4px}input,textarea,select{width:100%;padding:11px;margin:6px 0 12px;border:1px solid #cbd5e1;border-radius:7px;font-size:16px;background:#fff;color:#111827}
+textarea{min-height:75px}select[multiple]{min-height:140px}small{display:block;color:#64748b;margin:-6px 0 12px}
+button{padding:11px 15px;border:0;border-radius:7px;background:#2563eb;color:white;margin:4px;cursor:pointer;font-size:15px}
+button:disabled{opacity:.6;cursor:wait}.green{background:#15803d}.red{background:#dc2626}.item{border:1px solid #ddd;padding:12px;margin:12px 0;border-radius:8px;overflow-wrap:anywhere}
+#status{background:#fff;padding:12px;margin:12px 0;border-radius:7px;overflow-wrap:anywhere;white-space:pre-wrap}.hidden{display:none}.muted{color:#64748b}
 </style>
 </head>
-
 <body>
-
-<header>
-<h2>sigmetest admin</h2>
-<button id="logoutBtn" class="red">Logout</button>
-</header>
-
+<header><h2>ExamHub Admin</h2><button id="logoutBtn" class="red">Logout</button></header>
 <div class="container">
-
-<div id="status">HTML loaded. Waiting for JavaScript...</div>
+<div id="status">HTML loaded. Starting JavaScript...</div>
+<noscript><p style="padding:14px;background:#fee;color:#900">JavaScript is disabled. Enable JavaScript to use the Admin Panel.</p></noscript>
+<div id="adminArea" class="hidden">
+<section class="card">
+<h2>Add / Edit Exam</h2>
+<input type="hidden" id="examId">
+<label>Exam Name</label><input id="examTitle" placeholder="Exam Name">
+<label>Description</label><textarea id="examDescription"></textarea>
+<label>Class</label><input id="examClass" placeholder="Class">
+<label>Subject</label><input id="examSubject" placeholder="Subject">
+<label>Exam Fee (₹)</label><input id="examFee" type="number" min="0" step="0.01" value="0">
+<label>Exam Duration (Minutes)</label><input id="examDuration" type="number" min="1" max="300" value="30">
+<label><input type="checkbox" id="examPublished" style="width:auto"> Publish Exam</label>
+<button id="saveExamBtn">Save Exam</button><button id="clearExamBtn" class="red">Clear Form</button>
+</section>
+<section class="card"><h2>All Exams</h2><div id="examList">Loading exams...</div></section>
+<section class="card">
+<h2>Add / Edit Question</h2><input type="hidden" id="questionId">
+<label>Select Exam</label><select id="questionExam"><option value="">Select Exam</option></select>
+<label>Question</label><textarea id="questionText"></textarea>
+<label>Option A</label><input id="optionA"><label>Option B</label><input id="optionB">
+<label>Option C</label><input id="optionC"><label>Option D</label><input id="optionD">
+<label>Correct Answer</label><select id="correctOption"><option value="">Select Answer</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select>
+<label>Marks</label><input id="questionMarks" type="number" min="1" step="0.01" value="1">
+<button id="saveQuestionBtn">Save Question</button><button id="clearQuestionBtn" class="red">Clear Question</button>
+</section>
+<section class="card"><h2>All Questions</h2><div id="questionList">Select an Exam.</div></section>
+<section class="card">
+<h2>Offers: Exam Discount</h2><p>Exam select karke offer ON/OFF karein. Original aur offer price set karein.</p>
+<label>Select Exam</label><select id="offerExam"><option value="">Select Exam</option></select>
+<label>Original Price (₹)</label><input id="offerOriginal" type="number" min="0" step="0.01" placeholder="Original price">
+<label>Offer Price (₹)</label><input id="offerPrice" type="number" min="0" step="0.01" placeholder="Discounted price">
+<label>Offer Label</label><input id="offerLabel" value="Special Offer">
+<label><input type="checkbox" id="offerActive" style="width:auto"> Offer Active</label>
+<p id="offerPreview">Discount preview: —</p><button id="saveOfferBtn">Save Offer</button><button id="clearOfferBtn" class="red">Clear</button>
+<div id="offerList"></div>
+</section>
+<section class="card">
+<h2>Combo Packages (One Payment, Multiple Tests)</h2><input type="hidden" id="packageId">
+<label>Package Name</label><input id="packageName" placeholder="e.g. Board Exam Mega Pack">
+<label>Description</label><textarea id="packageDescription" placeholder="Package details"></textarea>
+<label>Original Price (₹)</label><input id="packageOriginal" type="number" min="0" step="0.01" placeholder="Original total">
+<label>Offer Price (₹)</label><input id="packagePrice" type="number" min="0" step="0.01" placeholder="Package offer price">
+<label>Choose Tests Included (multiple select)</label><select id="packageExams" multiple size="6"></select>
+<small>Select multiple exams. At least one exam is required.</small>
+<label><input type="checkbox" id="packageActive" style="width:auto"> Package Active</label>
+<p id="packagePreview">Discount preview: —</p><button id="savePackageBtn">Save Package</button><button id="clearPackageBtn" class="red">Clear</button>
+<div id="packageList"></div>
+</section>
+</div>
+</div>
 <script>
 (function(){
-  var box=document.getElementById("status");
-  if(box){box.textContent="ADMIN V5: JavaScript is running. Loading admin script...";}
-  document.documentElement.setAttribute("data-admin-v5-js","yes");
-})();
-<script>
-  <script>
-(function () {
-  var statusBox = document.getElementById("status");
-  if (statusBox) {
-    statusBox.textContent = "ADMIN V5 TEST: NEXT SCRIPT RUNNING";
-  }
-})();
-</script>
-document.getElementById("status").textContent =
-"ADMIN V5 TEST: NEXT SCRIPT RUNNING";
-</script>
-document.getElementById("status").textContent =
-"ADMIN V5 TEST: NEXT SCRIPT RUNNING";
-  </script>
-<noscript><div style="padding:14px;background:#fee;color:#900;font-weight:bold">JavaScript browser mein disabled hai. Admin Panel ke liye JavaScript enable karein.</div></noscript>
-
-<div id="adminArea" class="hidden">
-
-<div class="card">
-
-<h2>Add / Edit Exam</h2>
-
-<input type="hidden" id="examId">
-
-<label>Exam Name</label>
-<input id="examTitle" placeholder="Exam Name">
-
-<label>Description</label>
-<textarea id="examDescription"></textarea>
-
-<label>Class</label>
-<input id="examClass" placeholder="Class">
-
-<label>Subject</label>
-<input id="examSubject" placeholder="Subject">
-
-<label>Exam Fee</label>
-<input id="examFee" type="number" min="0" step="0.01" value="0">
-
-<label>Exam Duration (Minutes)</label>
-<input id="examDuration" type="number" min="1" max="300" value="30">
-
-<label>
-<input type="checkbox" id="examPublished" style="width:auto">
-Publish Exam
-</label>
-
-<br>
-
-<button id="saveExamBtn">Save Exam</button>
-<button id="clearExamBtn" class="red">Clear Form</button>
-
-</div>
-
-<div class="card">
-<h2>All Exams</h2>
-<div id="examList">Loading...</div>
-</div>
-
-<div class="card">
-
-<h2>Add / Edit Question</h2>
-
-<input type="hidden" id="questionId">
-
-<label>Select Exam</label>
-<select id="questionExam">
-<option value="">Select Exam</option>
-</select>
-
-<label>Question</label>
-<textarea id="questionText"></textarea>
-
-<label>Option A</label>
-<input id="optionA">
-
-<label>Option B</label>
-<input id="optionB">
-
-<label>Option C</label>
-<input id="optionC">
-
-<label>Option D</label>
-<input id="optionD">
-
-<label>Correct Answer</label>
-<select id="correctOption">
-<option value="">Select Answer</option>
-<option value="A">A</option>
-<option value="B">B</option>
-<option value="C">C</option>
-<option value="D">D</option>
-</select>
-
-<label>Marks</label>
-<input id="questionMarks" type="number" min="1" step="0.01" value="1">
-
-<button id="saveQuestionBtn">Save Question</button>
-<button id="clearQuestionBtn" class="red">Clear Question</button>
-
-</div>
-
-<div class="card">
-<h2>All Questions</h2>
-<div id="questionList">Select an Exam.</div>
-</div>
-
-<div class="card">
-<h2>Offers: Exam Discount</h2>
-<p>Exam select karke offer ON/OFF karein. Original aur offer price set karein; discount percentage automatic calculate hoga.</p>
-<label>Select Exam</label>
-<select id="offerExam"><option value="">Select Exam</option></select>
-<label>Original Price (₹)</label>
-<input id="offerOriginal" type="number" min="0" step="0.01" placeholder="Original price">
-<label>Offer Price (₹)</label>
-<input id="offerPrice" type="number" min="0" step="0.01" placeholder="Discounted price">
-<label>Offer Label</label>
-<input id="offerLabel" value="Special Offer" placeholder="Offer label">
-<label><input type="checkbox" id="offerActive" style="width:auto"> Offer Active</label>
-<p id="offerPreview">Discount preview: —</p>
-<button id="saveOfferBtn">Save Offer</button>
-<button id="clearOfferBtn" class="red">Clear</button>
-<div id="offerList"></div>
-</div>
-
-<div class="card">
-<h2>Combo Packages (One Payment, Multiple Tests)</h2>
-<input type="hidden" id="packageId">
-<label>Package Name</label>
-<input id="packageName" placeholder="e.g. Board Exam Mega Pack">
-<label>Description</label>
-<textarea id="packageDescription" placeholder="Package details"></textarea>
-<label>Original Price (₹)</label>
-<input id="packageOriginal" type="number" min="0" step="0.01" placeholder="Original total">
-<label>Offer Price (₹)</label>
-<input id="packagePrice" type="number" min="0" step="0.01" placeholder="Package offer price">
-<label>Choose Tests Included (multiple select)</label>
-<select id="packageExams" multiple size="6"></select>
-<small>Mobile: select tests using long-press or device's selection method. At least one exam required.</small>
-<label><input type="checkbox" id="packageActive" style="width:auto"> Package Active</label>
-<p id="packagePreview">Discount preview: —</p>
-<button id="savePackageBtn">Save Package</button>
-<button id="clearPackageBtn" class="red">Clear</button>
-<div id="packageList"></div>
-</div>
-
-</div>
-</div>
-
-<script>
-// Immediate JavaScript execution marker (before any startup logic)
-document.getElementById("status").textContent = "ADMIN V5: INLINE JAVASCRIPT IS RUNNING";
 "use strict";
-
-const $ = id => document.getElementById(id);
-
-let exams = [];
-let currentUser = null;
-
-/* STATUS */
-
-function status(message){
-    $("status").textContent = message;
+const $=id=>document.getElementById(id);
+let client=null, exams=[], offers=[], packages=[], currentUser=null;
+function setStatus(msg){const el=$("status");if(el)el.textContent=msg;}
+function showError(err){console.error("ExamHub Admin:",err);setStatus("ERROR: "+(err?.message||String(err)));}
+function timeout(p,label,ms=15000){return Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error(label+" timed out. Internet/config check karein.")),ms))]);}
+function loadScript(src){return new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=()=>reject(new Error("Script load nahi hua: "+src));document.head.appendChild(s);});}
+function examName(id){return exams.find(e=>String(e.id)===String(id))?.title||("Exam #"+id);}
+function safeText(el,text){el.textContent=text==null?"":String(text);}
+function money(n){return "₹"+Number(n||0).toFixed(2);}
+function discountPercent(o,p){o=Number(o);p=Number(p);return o>0&&p>=0&&p<=o?Math.round((o-p)*100/o):0;}
+function previewDiscount(oId,pId,outId){const o=$(oId).value,p=$(pId).value;if(o===""||p===""){safeText($(outId),"Discount preview: —");return;}const a=Number(o),b=Number(p);if(!Number.isFinite(a)||!Number.isFinite(b)||a<=0||b<0||b>a){safeText($(outId),"Discount preview: price values check karein.");return;}safeText($(outId),`Discount preview: ${money(a)} → ${money(b)} (${discountPercent(a,b)}% OFF)`);}
+function setBusy(btn,busy,label){if(!btn)return;btn.disabled=busy;if(busy)btn.dataset.oldLabel=btn.textContent;btn.textContent=busy?label:(btn.dataset.oldLabel||btn.textContent);if(!busy)delete btn.dataset.oldLabel;}
+async function requireResult(result){if(result.error)throw result.error;return result.data;}
+async function boot(){
+ try{
+  setStatus("Loading Supabase library...");
+  if(!window.supabase)await timeout(loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"),"Supabase library");
+  if(!window.supabase?.createClient)throw new Error("Supabase library global unavailable.");
+  setStatus("Supabase library loaded. Loading config.js...");
+  await timeout(loadScript("./config.js?v=admin-clean-20261127"),"config.js");
+  if(typeof window.supabaseClient!=="undefined") client=window.supabaseClient; else if(typeof supabaseClient!=="undefined") client=supabaseClient; else throw new Error("config.js must create client.");
+  // config.js commonly declares const supabaseClient in its own script; read it through window if it exposes it.
+  if(!client)throw new Error("config.js load hua lekin client accessible nahi. config.js mein supabaseClient create karein.");
+  await initAdmin();
+ }catch(e){showError(e);}
 }
-
-function showError(error){
-    console.error(error);
-    status("Error: " + (error.message || String(error)));
-}
-
-function withTimeout(promise, label, ms=15000){
-    return Promise.race([
-        promise,
-        new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+" timeout. Internet/configuration check karein aur refresh karein.")),ms))
-    ]);
-}
-
-/* ADMIN ACCESS */
-
 async function initAdmin(){
-
-    try{
-        status("Loading Supabase configuration...");
-
-        if(!window.supabase){
-            throw new Error("Supabase library load nahi hui.");
-        }
-
-        if(typeof supabaseClient === "undefined"){
-            throw new Error("config.js load nahi hui.");
-        }
-
-        status("Checking login session...");
-        const {data:sessionData,error:sessionError} =
-            await withTimeout(supabaseClient.auth.getSession(),"Session check");
-
-        if(sessionError) throw sessionError;
-
-        if(!sessionData.session){
-            location.replace("./login.html");
-            return;
-        }
-
-        status("Verifying account...");
-        const {data:userData,error:userError} =
-            await withTimeout(supabaseClient.auth.getUser(),"Account verification");
-
-        if(userError) throw userError;
-
-        currentUser = userData.user;
-
-        status("Checking admin permissions...");
-        const {data:profile,error:profileError} =
-            await withTimeout(supabaseClient
-            .from("profiles")
-            .select("role")
-            .eq("id",currentUser.id)
-            .maybeSingle(),"Admin profile check");
-
-        if(profileError) throw profileError;
-
-        if(!profile || profile.role !== "admin"){
-            throw new Error("Admin permission nahi hai.");
-        }
-
-        $("adminArea").classList.remove("hidden");
-
-        status("Loading exams...");
-        await loadExams();
-        populateOfferAndPackageExamOptions();
-        await loadOffers();
-        await loadPackages();
-
-        status("Admin Panel Ready.");
-
-    }catch(error){
-        showError(error);
-    }
+ try{
+  setStatus("Checking login session...");
+  const {data:sd,error:se}=await timeout(client.auth.getSession(),"Session check");if(se)throw se;
+  if(!sd.session){location.replace("./login.html");return;}
+  setStatus("Verifying account...");
+  const {data:ud,error:ue}=await timeout(client.auth.getUser(),"Account check");if(ue)throw ue;currentUser=ud.user;
+  setStatus("Checking admin permission...");
+  const {data:profile,error:pe}=await timeout(client.from("profiles").select("role").eq("id",currentUser.id).maybeSingle(),"Profile check");if(pe)throw pe;
+  if(!profile||profile.role!=="admin")throw new Error("Is account ka admin role nahi hai.");
+  $("adminArea").classList.remove("hidden");
+  setStatus("Loading exams...");
+  await loadExams();
+  await loadOffers();
+  await loadPackages();
+  setStatus("Admin Panel Ready.");
+ }catch(e){showError(e);}
 }
-
-/* LOGOUT */
-
 $("logoutBtn").addEventListener("click",async()=>{
-    try{
-        $("logoutBtn").disabled=true;
-        status("Logging out...");
-        if(typeof supabaseClient === "undefined") throw new Error("Supabase config load nahi hui.");
-        const {error}=await withTimeout(supabaseClient.auth.signOut(),"Logout",15000);
-        if(error) throw error;
-        location.replace("./login.html");
-    }catch(error){
-        showError(error);
-        $("logoutBtn").disabled=false;
-    }
+ try{setBusy($("logoutBtn"),true,"Logging out...");if(!supabaseClient)throw new Error("Supabase client not ready.");const {error}=await timeout(client.auth.signOut(),"Logout");if(error)throw error;location.replace("./login.html");}
+ catch(e){showError(e);setBusy($("logoutBtn"),false);}
 });
-
-/* CLEAR EXAM */
-
-function clearExamForm(){
-
-    $("examId").value="";
-    $("examTitle").value="";
-    $("examDescription").value="";
-    $("examClass").value="";
-    $("examSubject").value="";
-    $("examFee").value="0";
-    $("examDuration").value="30";
-    $("examPublished").checked=false;
-
-    $("saveExamBtn").textContent="Save Exam";
-
-}
-
-/* SAVE EXAM */
-
+function clearExamForm(){ $("examId").value="";$("examTitle").value="";$("examDescription").value="";$("examClass").value="";$("examSubject").value="";$("examFee").value="0";$("examDuration").value="30";$("examPublished").checked=false;$("saveExamBtn").textContent="Save Exam";}
 async function saveExam(){
-
-    try{
-
-        const title=$("examTitle").value.trim();
-
-        const fee=Number($("examFee").value);
-        const duration=Number($("examDuration").value);
-
-        if(!title){
-            throw new Error("Exam Name likhein.");
-        }
-
-        if(!Number.isFinite(fee) || fee<0){
-            throw new Error("Valid Exam Fee likhein.");
-        }
-
-        if(!Number.isInteger(duration) || duration<1 || duration>300){
-            throw new Error("Timer 1 se 300 minutes ke beech hona chahiye.");
-        }
-
-        const examData={
-
-            title:title,
-
-            description:$("examDescription").value.trim(),
-
-            class_name:$("examClass").value.trim(),
-
-            subject:$("examSubject").value.trim(),
-
-            fee:fee,
-
-            duration_minutes:duration,
-
-            is_published:$("examPublished").checked
-
-        };
-
-        const id=$("examId").value;
-
-        status("Saving Exam...");
-
-        let result;
-
-        if(id){
-
-            result=await supabaseClient
-            .from("exams")
-            .update(examData)
-            .eq("id",id);
-
-        }else{
-
-            result=await supabaseClient
-            .from("exams")
-            .insert(examData);
-
-        }
-
-        if(result.error) throw result.error;
-
-        alert("Exam Saved Successfully!");
-
-        clearExamForm();
-
-        await loadExams();
-
-        status("Exam saved successfully.");
-
-    }catch(error){
-        showError(error);
-    }
-
+ try{
+  const title=$("examTitle").value.trim(),fee=Number($("examFee").value),duration=Number($("examDuration").value);
+  if(!title)throw new Error("Exam name likhein.");if(!Number.isFinite(fee)||fee<0)throw new Error("Valid fee enter karein.");if(!Number.isInteger(duration)||duration<1||duration>300)throw new Error("Duration 1-300 minutes honi chahiye.");
+  const obj={title,description:$("examDescription").value.trim(),class_name:$("examClass").value.trim(),subject:$("examSubject").value.trim(),fee,duration_minutes:duration,is_published:$("examPublished").checked};
+  const id=$("examId").value;setStatus("Saving exam...");
+  const r=id?await client.from("exams").update(obj).eq("id",id):await client.from("exams").insert(obj);if(r.error)throw r.error;
+  clearExamForm();await loadExams();await loadOffers();await loadPackages();setStatus("Exam saved successfully.");
+ }catch(e){showError(e);}
 }
-
-$("saveExamBtn").addEventListener("click",saveExam);
-
-$("clearExamBtn").addEventListener("click",clearExamForm);
-
-/* LOAD EXAMS */
-
+$("saveExamBtn").addEventListener("click",saveExam);$("clearExamBtn").addEventListener("click",clearExamForm);
 async function loadExams(){
-
-    try{
-
-        const {data,error}=await supabaseClient
-        .from("exams")
-        .select("id,title,description,class_name,subject,fee,duration_minutes,is_published")
-        .order("id",{ascending:false});
-
-        if(error) throw error;
-
-        exams=data || [];
-        populateOfferAndPackageExamOptions();
-
-        $("examList").innerHTML="";
-
-        $("questionExam").innerHTML=
-        '<option value="">Select Exam</option>';
-
-        if(exams.length===0){
-            $("examList").textContent="No Exams Found.";
-            return;
-        }
-
-        exams.forEach(exam=>{
-
-            const option=document.createElement("option");
-            option.value=exam.id;
-            option.textContent=exam.title;
-
-            $("questionExam").appendChild(option);
-
-            const box=document.createElement("div");
-            box.className="item";
-
-            const title=document.createElement("h3");
-            title.textContent=exam.title;
-
-            const details=document.createElement("p");
-
-            details.textContent=
-                "Class: "+(exam.class_name || "-")+
-                " | Subject: "+(exam.subject || "-")+
-                " | Fee: ₹"+exam.fee+
-                " | Timer: "+exam.duration_minutes+" Minutes"+
-                " | "+(exam.is_published?"Published":"Unpublished");
-
-            const edit=document.createElement("button");
-            edit.textContent="Edit";
-            edit.addEventListener("click",()=>editExam(exam.id));
-
-            const publish=document.createElement("button");
-            publish.textContent=exam.is_published?"Unpublish":"Publish";
-            publish.className=exam.is_published?"red":"green";
-            publish.addEventListener("click",()=>togglePublish(exam));
-
-            box.append(title,details,edit,publish);
-
-            $("examList").appendChild(box);
-
-        });
-
-    }catch(error){
-        showError(error);
-    }
-
+ try{
+  const {data,error}=await client.from("exams").select("id,title,description,class_name,subject,fee,duration_minutes,is_published").order("id",{ascending:false});if(error)throw error;
+  exams=data||[];["questionExam","offerExam"].forEach(id=>{$(id).innerHTML='<option value="">Select Exam</option>';});
+  $("packageExams").innerHTML="";
+  exams.forEach(ex=>{for(const sid of ["questionExam","offerExam"]){const op=document.createElement("option");op.value=ex.id;op.textContent=ex.title;$(sid).appendChild(op);}const po=document.createElement("option");po.value=ex.id;po.textContent=ex.title;$("packageExams").appendChild(po);});
+  const list=$("examList");list.innerHTML="";
+  if(!exams.length){list.textContent="No exams yet.";return;}
+  exams.forEach(ex=>{
+   const box=document.createElement("div");box.className="item";const h=document.createElement("h3");h.textContent=ex.title;const p=document.createElement("p");p.textContent=`Class: ${ex.class_name||"-"} | Subject: ${ex.subject||"-"} | Fee: ${money(ex.fee)} | Timer: ${ex.duration_minutes||30} min | ${ex.is_published?"Published":"Unpublished"}`;
+   const edit=document.createElement("button");edit.textContent="Edit";edit.onclick=()=>{ $("examId").value=ex.id;$("examTitle").value=ex.title||"";$("examDescription").value=ex.description||"";$("examClass").value=ex.class_name||"";$("examSubject").value=ex.subject||"";$("examFee").value=ex.fee??0;$("examDuration").value=ex.duration_minutes??30;$("examPublished").checked=!!ex.is_published;$("saveExamBtn").textContent="Update Exam";window.scrollTo({top:0,behavior:"smooth"});};
+   const toggle=document.createElement("button");toggle.textContent=ex.is_published?"Unpublish":"Publish";toggle.className=ex.is_published?"red":"green";toggle.onclick=async()=>{try{const {error}=await client.from("exams").update({is_published:!ex.is_published}).eq("id",ex.id);if(error)throw error;await loadExams();}catch(e){showError(e);}};
+   box.append(h,p,edit,toggle);list.appendChild(box);
+  });
+ }catch(e){showError(e);}
 }
-
-/* EDIT EXAM */
-
-function editExam(id){
-
-    const exam=exams.find(item=>String(item.id)===String(id));
-
-    if(!exam) return;
-
-    $("examId").value=exam.id;
-    $("examTitle").value=exam.title || "";
-    $("examDescription").value=exam.description || "";
-    $("examClass").value=exam.class_name || "";
-    $("examSubject").value=exam.subject || "";
-    $("examFee").value=exam.fee ?? 0;
-    $("examDuration").value=exam.duration_minutes ?? 30;
-    $("examPublished").checked=!!exam.is_published;
-
-    $("saveExamBtn").textContent="Update Exam";
-
-    window.scrollTo({top:0,behavior:"smooth"});
-
-}
-
-/* PUBLISH */
-
-async function togglePublish(exam){
-
-    try{
-
-        const {error}=await supabaseClient
-        .from("exams")
-        .update({is_published:!exam.is_published})
-        .eq("id",exam.id);
-
-        if(error) throw error;
-
-        await loadExams();
-
-    }catch(error){
-        showError(error);
-    }
-
-}
-
-/* CLEAR QUESTION */
-
-function clearQuestionForm(){
-
-    $("questionId").value="";
-    $("questionText").value="";
-    $("optionA").value="";
-    $("optionB").value="";
-    $("optionC").value="";
-    $("optionD").value="";
-    $("correctOption").value="";
-    $("questionMarks").value="1";
-
-    $("saveQuestionBtn").textContent="Save Question";
-
-}
-
-/* SAVE QUESTION */
-
+function clearQuestionForm(){ $("questionId").value="";$("questionText").value="";["optionA","optionB","optionC","optionD"].forEach(id=>$(id).value="");$("correctOption").value="";$("questionMarks").value="1";$("saveQuestionBtn").textContent="Save Question";}
 async function saveQuestion(){
-
-    try{
-
-        const examId=$("questionExam").value;
-
-        if(!examId){
-            throw new Error("Exam Select Karein.");
-        }
-
-        const questionText=$("questionText").value.trim();
-
-        const correct=$("correctOption").value;
-
-        const marks=Number($("questionMarks").value);
-
-        if(!questionText){
-            throw new Error("Question likhein.");
-        }
-
-        const a=$("optionA").value.trim();
-        const b=$("optionB").value.trim();
-        const c=$("optionC").value.trim();
-        const d=$("optionD").value.trim();
-
-        if(!a || !b || !c || !d){
-            throw new Error("Charo options bharein.");
-        }
-
-        if(!["A","B","C","D"].includes(correct)){
-            throw new Error("Correct Answer select karein.");
-        }
-
-        if(!Number.isFinite(marks) || marks<1){
-            throw new Error("Valid marks likhein.");
-        }
-
-        const question={
-
-            exam_id:Number(examId),
-            question_text:questionText,
-            option_a:a,
-            option_b:b,
-            option_c:c,
-            option_d:d,
-            correct_option:correct,
-            marks:marks
-
-        };
-
-        const id=$("questionId").value;
-
-        let result;
-
-        if(id){
-
-            result=await supabaseClient
-            .from("questions")
-            .update(question)
-            .eq("id",id);
-
-        }else{
-
-            result=await supabaseClient
-            .from("questions")
-            .insert(question);
-
-        }
-
-        if(result.error) throw result.error;
-
-        alert("Question Saved Successfully!");
-
-        clearQuestionForm();
-
-        await loadQuestions();
-
-    }catch(error){
-        showError(error);
-    }
-
+ try{
+  const examId=$("questionExam").value,qText=$("questionText").value.trim(),opts=["optionA","optionB","optionC","optionD"].map(id=>$(id).value.trim()),correct=$("correctOption").value,marks=Number($("questionMarks").value);
+  if(!examId)throw new Error("Exam select karein.");if(!qText)throw new Error("Question likhein.");if(opts.some(x=>!x))throw new Error("Charo options bharein.");if(!["A","B","C","D"].includes(correct))throw new Error("Correct answer choose karein.");if(!Number.isFinite(marks)||marks<1)throw new Error("Marks valid enter karein.");
+  const row={exam_id:examId,question_text:qText,option_a:opts[0],option_b:opts[1],option_c:opts[2],option_d:opts[3],correct_option:correct,marks};
+  const id=$("questionId").value;setStatus("Saving question...");const r=id?await client.from("questions").update(row).eq("id",id):await client.from("questions").insert(row);if(r.error)throw r.error;
+  clearQuestionForm();await loadQuestions();setStatus("Question saved.");
+ }catch(e){showError(e);}
 }
-
-$("saveQuestionBtn").addEventListener("click",saveQuestion);
-
-$("clearQuestionBtn").addEventListener("click",clearQuestionForm);
-
-/* LOAD QUESTIONS */
-
+$("saveQuestionBtn").addEventListener("click",saveQuestion);$("clearQuestionBtn").addEventListener("click",clearQuestionForm);
 async function loadQuestions(){
-
-    try{
-
-        const examId=$("questionExam").value;
-
-        if(!examId){
-            $("questionList").textContent="Select an Exam.";
-            return;
-        }
-
-        const {data,error}=await supabaseClient
-        .from("questions")
-        .select("*")
-        .eq("exam_id",Number(examId))
-        .order("id",{ascending:true});
-
-        if(error) throw error;
-
-        $("questionList").innerHTML="";
-
-        if(!data || data.length===0){
-            $("questionList").textContent="No Questions Found.";
-            return;
-        }
-
-        data.forEach((q,index)=>{
-
-            const box=document.createElement("div");
-            box.className="item";
-
-            const heading=document.createElement("h3");
-            heading.textContent=(index+1)+". "+q.question_text;
-
-            const details=document.createElement("p");
-            details.textContent=
-                "A: "+q.option_a+
-                " | B: "+q.option_b+
-                " | C: "+q.option_c+
-                " | D: "+q.option_d+
-                " | Correct: "+q.correct_option+
-                " | Marks: "+q.marks;
-
-            const edit=document.createElement("button");
-            edit.textContent="Edit";
-            edit.addEventListener("click",()=>editQuestion(q));
-
-            const del=document.createElement("button");
-            del.textContent="Delete Question";
-            del.className="red";
-            del.addEventListener("click",()=>deleteQuestion(q.id));
-
-            box.append(heading,details,edit,del);
-
-            $("questionList").appendChild(box);
-
-        });
-
-    }catch(error){
-        showError(error);
-    }
-
+ try{
+  const examId=$("questionExam").value;const list=$("questionList");if(!examId){list.textContent="Select an Exam.";return;}
+  const {data,error}=await client.from("questions").select("*").eq("exam_id",examId).order("id",{ascending:true});if(error)throw error;
+  list.innerHTML="";if(!data?.length){list.textContent="No questions for this exam yet.";return;}
+  data.forEach((q,i)=>{const box=document.createElement("div");box.className="item";const h=document.createElement("h3");h.textContent=`${i+1}. ${q.question_text}`;const p=document.createElement("p");p.textContent=`A: ${q.option_a} | B: ${q.option_b} | C: ${q.option_c} | D: ${q.option_d} | Correct: ${q.correct_option} | Marks: ${q.marks}`;
+   const edit=document.createElement("button");edit.textContent="Edit";edit.onclick=()=>{$("questionId").value=q.id;$("questionText").value=q.question_text||"";$("optionA").value=q.option_a||"";$("optionB").value=q.option_b||"";$("optionC").value=q.option_c||"";$("optionD").value=q.option_d||"";$("correctOption").value=q.correct_option||"";$("questionMarks").value=q.marks??1;$("saveQuestionBtn").textContent="Update Question";window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});};
+   const del=document.createElement("button");del.textContent="Delete";del.className="red";del.onclick=async()=>{if(!confirm("Question delete karna hai?"))return;try{const {error}=await client.from("questions").delete().eq("id",q.id);if(error)throw error;await loadQuestions();}catch(e){showError(e);}};
+   box.append(h,p,edit,del);list.appendChild(box);});
+ }catch(e){showError(e);}
 }
-
 $("questionExam").addEventListener("change",loadQuestions);
-
-/* EDIT QUESTION */
-
-function editQuestion(q){
-
-    $("questionId").value=q.id;
-    $("questionText").value=q.question_text || "";
-    $("optionA").value=q.option_a || "";
-    $("optionB").value=q.option_b || "";
-    $("optionC").value=q.option_c || "";
-    $("optionD").value=q.option_d || "";
-    $("correctOption").value=q.correct_option || "";
-    $("questionMarks").value=q.marks || 1;
-
-    $("saveQuestionBtn").textContent="Update Question";
-
-    window.scrollTo({
-        top:document.body.scrollHeight,
-        behavior:"smooth"
-    });
-
+async function loadOffers(){
+ try{
+  const {data,error}=await client.from("exam_offers").select("*").order("updated_at",{ascending:false});if(error)throw error;offers=data||[];
+  const list=$("offerList");list.innerHTML="";if(!offers.length){list.textContent="No offers saved.";return;}
+  offers.forEach(o=>{const box=document.createElement("div");box.className="item";box.textContent=`${examName(o.exam_id)} | ${money(o.original_price)} → ${money(o.offer_price)} | ${discountPercent(o.original_price,o.offer_price)}% off | ${o.is_active?"Active":"Inactive"} | ${o.offer_label||""}`;
+   const edit=document.createElement("button");edit.textContent="Edit";edit.onclick=()=>{$("offerExam").value=o.exam_id;$("offerOriginal").value=o.original_price;$("offerPrice").value=o.offer_price;$("offerLabel").value=o.offer_label||"Special Offer";$("offerActive").checked=!!o.is_active;previewDiscount("offerOriginal","offerPrice","offerPreview");window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});};
+   const del=document.createElement("button");del.textContent="Delete";del.className="red";del.onclick=async()=>{if(!confirm("Offer delete karein?"))return;try{const {error}=await client.from("exam_offers").delete().eq("exam_id",o.exam_id);if(error)throw error;await loadOffers();}catch(e){showError(e);}};
+   box.append(edit,del);list.appendChild(box);});
+ }catch(e){showError(e);}
 }
-
-/* DELETE QUESTION */
-
-async function deleteQuestion(id){
-
-    if(!confirm("Question delete karna chahte hain?")) return;
-
-    try{
-
-        const {error}=await supabaseClient
-        .from("questions")
-        .delete()
-        .eq("id",id);
-
-        if(error) throw error;
-
-        await loadQuestions();
-
-    }catch(error){
-        showError(error);
-    }
-
-}
-
-
-/* OFFERS & COMBO PACKAGES */
-function discountPercent(original, discounted){
-    original=Number(original); discounted=Number(discounted);
-    if(!Number.isFinite(original)||original<=0||discounted<0||discounted>original) return 0;
-    return Math.round((original-discounted)*100/original);
-}
-function previewDiscount(originalId, priceId, previewId){
-    const original=Number($(originalId).value), price=Number($(priceId).value);
-    if($(originalId).value==="" || $(priceId).value==="" || !Number.isFinite(original) || original<=0 || price<0 || price>original){
-        $(previewId).textContent="Discount preview: price values check karein."; return;
-    }
-    const pct=discountPercent(original,price);
-    $(previewId).textContent=`Discount preview: ₹${original.toFixed(2)} → ₹${price.toFixed(2)} (${pct}% OFF)`;
-}
-["offerOriginal","offerPrice"].forEach(id=>$(id).addEventListener("input",()=>previewDiscount("offerOriginal","offerPrice","offerPreview")));
-["packageOriginal","packagePrice"].forEach(id=>$(id).addEventListener("input",()=>previewDiscount("packageOriginal","packagePrice","packagePreview")));
-
-function clearOfferForm(){
-    $("offerExam").value=""; $("offerOriginal").value=""; $("offerPrice").value="";
-    $("offerLabel").value="Special Offer"; $("offerActive").checked=false;
-    $("offerPreview").textContent="Discount preview: —";
-}
-async function saveOffer(){
-    try{
-        const examId=$("offerExam").value, original=Number($("offerOriginal").value), pr
+function clearOffer(){ $("offerExam").value="";$("offerOriginal").value="";$("offerPrice").value="";$("offerLabel").value="Special Offer";$("offerActive").checked=false;$("offerPreview").textContent="Discount preview: —";}
+$("offerOriginal").addEventListener("input",()=>previewDiscount("offerOriginal","offerPrice","offerPreview"));$("offerPrice").addEventListener("input",()=>previewDiscount("offerOriginal","offerPrice","offerPreview"));
+$("clearOfferBtn").addEventListener("click",clearOffer);
+$("saveOfferBtn").addEventListener("click",async()=>{
+ try{const examId=$("offerExam").value,original=Number($("offerOriginal").value),price=Number($("offerPrice").value);if(!examId)throw new Error("Exam select karein.");if($("offerOriginal").value===""||$("offerPrice").value===""||!Number.isFinite(original)||!Number.isFinite(price)||original<=0||price<0||price>original)throw new Error("Prices valid honi chahiye; offer price original se zyada nahi.");const row={exam_id:examId,original_price:original,offer_price:price,is_active:$("offerActive").checked,offer_label:$("offerLabel").value.trim()||"Special Offer",updated_at:new Date().toISOString()};const {error}=await client.from("exam_offers").upsert(row,{onConflict:"exam_id"});if(error)throw error;clearOffer();await loadOffers();setStatus("Offer saved.");}catch(e){showError(e);}
+});
+async function loadPackages(){
+ try{
+  const {data,error}=await client.from("combo_packages").select("*").order("id",{ascending:false});if(error)throw error;packages=data||[];const list=$("packageList");list.innerHTML="";if(!packages.length){list.textContent="No combo packages saved.";return;}
+  for(const pkg of packages){const {data:links,error:le}=await client.from("combo_package_exams").select("exam_id").eq("package_id",pkg.id);if(le)throw le;const ids=(links||[]).map(x=>x.exam_id);const names=ids.map(examName).join(", ");const box=document.createElement("div");box.className="item";box.textContent=`${pkg.name} | ${money(pkg.original_price)} → ${money(pkg.offer_price)} | ${discountPercent(pkg.original_price,pkg.offer_price)}% off | ${pkg.is_active?"Active":"Inactive"} | Tests: ${names}`;
+   const edit=document.createElement("button");edit.textContent="Edit";edit.onclick=()=>{$("packageId").value=pkg.id;$("packageName").value=pkg.name||"";$("packageDescription").value=pkg.description||"";$("packageOriginal").value=pkg.original_price;$("packagePrice").value=pkg.offer_price;$("packageActive").checked=!!pkg.is_active;Array.from($("packageExams").options).forEach(opt=>opt.selected=ids.some(x=>String(x)===String(opt.value)));previewDiscount("packageOriginal","packagePrice","packagePreview");window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});};
+   const del=document.createElement("button");del.textContent="Delete";del.className="red
