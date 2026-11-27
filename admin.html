@@ -190,11 +190,19 @@ function showError(error){
     status("Error: " + (error.message || String(error)));
 }
 
+function withTimeout(promise, label, ms=15000){
+    return Promise.race([
+        promise,
+        new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+" timeout. Internet/configuration check karein aur refresh karein.")),ms))
+    ]);
+}
+
 /* ADMIN ACCESS */
 
 async function initAdmin(){
 
     try{
+        status("Loading Supabase configuration...");
 
         if(!window.supabase){
             throw new Error("Supabase library load nahi hui.");
@@ -204,8 +212,9 @@ async function initAdmin(){
             throw new Error("config.js load nahi hui.");
         }
 
+        status("Checking login session...");
         const {data:sessionData,error:sessionError} =
-            await supabaseClient.auth.getSession();
+            await withTimeout(supabaseClient.auth.getSession(),"Session check");
 
         if(sessionError) throw sessionError;
 
@@ -214,19 +223,21 @@ async function initAdmin(){
             return;
         }
 
+        status("Verifying account...");
         const {data:userData,error:userError} =
-            await supabaseClient.auth.getUser();
+            await withTimeout(supabaseClient.auth.getUser(),"Account verification");
 
         if(userError) throw userError;
 
         currentUser = userData.user;
 
+        status("Checking admin permissions...");
         const {data:profile,error:profileError} =
-            await supabaseClient
+            await withTimeout(supabaseClient
             .from("profiles")
             .select("role")
             .eq("id",currentUser.id)
-            .maybeSingle();
+            .maybeSingle(),"Admin profile check");
 
         if(profileError) throw profileError;
 
@@ -236,6 +247,7 @@ async function initAdmin(){
 
         $("adminArea").classList.remove("hidden");
 
+        status("Loading exams...");
         await loadExams();
         populateOfferAndPackageExamOptions();
         await loadOffers();
@@ -251,16 +263,17 @@ async function initAdmin(){
 /* LOGOUT */
 
 $("logoutBtn").addEventListener("click",async()=>{
-
-    const {error}=await supabaseClient.auth.signOut();
-
-    if(error){
+    try{
+        $("logoutBtn").disabled=true;
+        status("Logging out...");
+        if(typeof supabaseClient === "undefined") throw new Error("Supabase config load nahi hui.");
+        const {error}=await withTimeout(supabaseClient.auth.signOut(),"Logout",15000);
+        if(error) throw error;
+        location.replace("./login.html");
+    }catch(error){
         showError(error);
-        return;
+        $("logoutBtn").disabled=false;
     }
-
-    location.replace("./login.html");
-
 });
 
 /* CLEAR EXAM */
@@ -725,19 +738,4 @@ async function saveOffer(){
         if($("offerOriginal").value==="" || $("offerPrice").value==="" || !Number.isFinite(original)||!Number.isFinite(price)||original<0||price<0||price>original) throw new Error("Valid price values dein. Offer price original price se zyada nahi ho sakti.");
         const payload={exam_id:Number(examId),original_price:original,offer_price:price,is_active:$("offerActive").checked,offer_label:$("offerLabel").value.trim()||"Special Offer",updated_at:new Date().toISOString()};
         status("Saving offer...");
-        const {error}=await supabaseClient.from("exam_offers").upsert(payload,{onConflict:"exam_id"});
-        if(error) throw error;
-        alert("Offer saved!"); clearOfferForm(); await loadOffers(); status("Offer saved successfully.");
-    }catch(e){showError(e);}
-}
-async function loadOffers(){
-    try{
-        const {data,error}=await supabaseClient.from("exam_offers").select("*, exams(id,title)").order("id",{ascending:false});
-        if(error) throw error;
-        const host=$("offerList"); host.innerHTML="";
-        if(!data||!data.length){host.textContent="No offers saved yet.";return;}
-        data.forEach(o=>{
-            const box=document.createElement("div");box.className="item";
-            const heading=document.createElement("h3");heading.textContent=(o.exams?.title||"Exam #"+o.exam_id)+" — "+(o.is_active?"ACTIVE":"OFF");
-            const info=document.createElement("p");
-    
+        const {error}=await supabaseClient.from("exam_offers").up
