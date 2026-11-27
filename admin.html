@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ExamHub Admin V4 Diagnostic</title>
+<title>ExamHub Admin V5 Diagnostic</title>
 <script>window.__ADMIN_JS_EARLY_TEST=true;document.documentElement.setAttribute("data-js","enabled");</script>
 
 <!-- Supabase and config are loaded by the diagnostic bootstrap below -->
@@ -37,6 +37,13 @@ button{padding:11px 16px;border:0;border-radius:7px;background:#2563eb;color:whi
 <div class="container">
 
 <div id="status">HTML loaded. Waiting for JavaScript...</div>
+<script>
+(function(){
+  var box=document.getElementById("status");
+  if(box){box.textContent="ADMIN V5: JavaScript is running. Loading admin script...";}
+  document.documentElement.setAttribute("data-admin-v5-js","yes");
+})();
+</script>
 <noscript><div style="padding:14px;background:#fee;color:#900;font-weight:bold">JavaScript browser mein disabled hai. Admin Panel ke liye JavaScript enable karein.</div></noscript>
 
 <div id="adminArea" class="hidden">
@@ -174,7 +181,7 @@ Publish Exam
 
 <script>
 // Immediate JavaScript execution marker (before any startup logic)
-document.getElementById("status").textContent = "ADMIN V4: INLINE JAVASCRIPT IS RUNNING";
+document.getElementById("status").textContent = "ADMIN V5: INLINE JAVASCRIPT IS RUNNING";
 "use strict";
 
 const $ = id => document.getElementById(id);
@@ -736,6 +743,4 @@ function clearOfferForm(){
 }
 async function saveOffer(){
     try{
-        const examId=$("offerExam").value, original=Number($("offerOriginal").value), price=Number($("offerPrice").value);
-        if(!examId) throw new Error("Exam select karein.");
-        if($("offerOriginal").value==="" || $("offerPrice").value==="" || !Number.isFinite(original)||!Number.isFinite(price)||original<0||pri
+        const examId=$("offerExam").value, original=Number($("offerOriginal").value), pr
