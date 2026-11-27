@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ExamHub Admin</title>
+<title>ExamHub Admin V6</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9;color:#1e293b}
 header{background:#172554;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px}
@@ -19,7 +19,7 @@ button:disabled{opacity:.6;cursor:wait}.green{background:#15803d}.red{background
 <body>
 <header><h2>ExamHub Admin</h2><button id="logoutBtn" class="red">Logout</button></header>
 <div class="container">
-<div id="status">HTML loaded. Starting JavaScript...</div>
+<div id="status">HTML loaded. Waiting for ADMIN V6 JavaScript...</div>
 <noscript><p style="padding:14px;background:#fee;color:#900">JavaScript is disabled. Enable JavaScript to use the Admin Panel.</p></noscript>
 <div id="adminArea" class="hidden">
 <section class="card">
@@ -71,6 +71,9 @@ button:disabled{opacity:.6;cursor:wait}.green{background:#15803d}.red{background
 </div>
 </div>
 <script>
+document.getElementById("status").textContent="ADMIN V6: SCRIPT EXECUTING";
+window.onerror=function(message,source,line){document.getElementById("status").textContent="JS ERROR: "+message+" (line "+line+")";};
+window.addEventListener("unhandledrejection",function(e){document.getElementById("status").textContent="ASYNC ERROR: "+(e.reason&&e.reason.message||String(e.reason));});
 (function(){
 "use strict";
 const $=id=>document.getElementById(id);
@@ -92,7 +95,7 @@ async function boot(){
   if(!window.supabase)await timeout(loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"),"Supabase library");
   if(!window.supabase?.createClient)throw new Error("Supabase library global unavailable.");
   setStatus("Supabase library loaded. Loading config.js...");
-  await timeout(loadScript("./config.js?v=admin-clean-20261127"),"config.js");
+  await timeout(loadScript("./config.js?v=admin-v6-20261127"),"config.js");
   if(typeof window.supabaseClient!=="undefined") client=window.supabaseClient; else if(typeof supabaseClient!=="undefined") client=supabaseClient; else throw new Error("config.js must create client.");
   // config.js commonly declares const supabaseClient in its own script; read it through window if it exposes it.
   if(!client)throw new Error("config.js load hua lekin client accessible nahi. config.js mein supabaseClient create karein.");
@@ -118,7 +121,7 @@ async function initAdmin(){
  }catch(e){showError(e);}
 }
 $("logoutBtn").addEventListener("click",async()=>{
- try{setBusy($("logoutBtn"),true,"Logging out...");if(!supabaseClient)throw new Error("Supabase client not ready.");const {error}=await timeout(client.auth.signOut(),"Logout");if(error)throw error;location.replace("./login.html");}
+ try{setBusy($("logoutBtn"),true,"Logging out...");if(!client)throw new Error("Supabase client not ready.");const {error}=await timeout(client.auth.signOut(),"Logout");if(error)throw error;location.replace("./login.html");}
  catch(e){showError(e);setBusy($("logoutBtn"),false);}
 });
 function clearExamForm(){ $("examId").value="";$("examTitle").value="";$("examDescription").value="";$("examClass").value="";$("examSubject").value="";$("examFee").value="0";$("examDuration").value="30";$("examPublished").checked=false;$("saveExamBtn").textContent="Save Exam";}
@@ -192,5 +195,4 @@ async function loadPackages(){
  try{
   const {data,error}=await client.from("combo_packages").select("*").order("id",{ascending:false});if(error)throw error;packages=data||[];const list=$("packageList");list.innerHTML="";if(!packages.length){list.textContent="No combo packages saved.";return;}
   for(const pkg of packages){const {data:links,error:le}=await client.from("combo_package_exams").select("exam_id").eq("package_id",pkg.id);if(le)throw le;const ids=(links||[]).map(x=>x.exam_id);const names=ids.map(examName).join(", ");const box=document.createElement("div");box.className="item";box.textContent=`${pkg.name} | ${money(pkg.original_price)} → ${money(pkg.offer_price)} | ${discountPercent(pkg.original_price,pkg.offer_price)}% off | ${pkg.is_active?"Active":"Inactive"} | Tests: ${names}`;
-   const edit=document.createElement("button");edit.textContent="Edit";edit.onclick=()=>{$("packageId").value=pkg.id;$("packageName").value=pkg.name||"";$("packageDescription").value=pkg.description||"";$("packageOriginal").value=pkg.original_price;$("packagePrice").value=pkg.offer_price;$("packageActive").checked=!!pkg.is_active;Array.from($("packageExams").options).forEach(opt=>opt.selected=ids.some(x=>String(x)===String(opt.value)));previewDiscount("packageOriginal","packagePrice","packagePreview");window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});};
-   const del=document.createElement("button");del.textContent="Delete";del.className="red
+   const edit=document.createElement("button");edit.textContent="Edit";edit.onclick=()=>{$("packageId").value=pkg.id;$("packageName").value=pkg.name||"";$("packageDescription").value=pkg.description||"";$("packageOriginal").value=pkg.original_price;$("packagePrice").value=pkg.offer_
