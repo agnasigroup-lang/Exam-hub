@@ -35,7 +35,7 @@ button{padding:11px 16px;border:0;border-radius:7px;background:#2563eb;color:whi
 
 <div class="container">
 
-<div id="status">Checking Admin Access...</div>
+<div id="status">HTML loaded. JavaScript startup pending...</div>
 
 <div id="adminArea" class="hidden">
 
@@ -737,5 +737,4 @@ async function saveOffer(){
         if($("offerOriginal").value==="" || $("offerPrice").value==="" || !Number.isFinite(original)||!Number.isFinite(price)||original<0||price<0||price>original) throw new Error("Valid price values dein. Offer price original price se zyada nahi ho sakti.");
         const payload={exam_id:Number(examId),original_price:original,offer_price:price,is_active:$("offerActive").checked,offer_label:$("offerLabel").value.trim()||"Special Offer",updated_at:new Date().toISOString()};
         status("Saving offer...");
-        const {error}=await supabaseClient.from("exam_offers").upsert(payload,{onConflict:"exam_id"});
- 
+        const {error}=await supabaseClient.from("exam_offers").upsert(payload,{onConfl
