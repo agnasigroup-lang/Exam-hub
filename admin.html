@@ -16,6 +16,8 @@ header{background:#172554;color:white;padding:16px;display:flex;justify-content:
 .card{background:white;padding:20px;margin-bottom:20px;border-radius:12px;box-shadow:0 2px 8px #0001}
 input,textarea,select{width:100%;padding:12px;margin:7px 0 14px;border:1px solid #cbd5e1;border-radius:7px;font-size:16px}
 textarea{min-height:75px}
+select[multiple]{min-height:140px}
+small{display:block;color:#64748b;margin:-8px 0 12px}
 button{padding:11px 16px;border:0;border-radius:7px;background:#2563eb;color:white;margin:4px;cursor:pointer}
 .green{background:#15803d}
 .red{background:#dc2626}
@@ -127,6 +129,45 @@ Publish Exam
 <div id="questionList">Select an Exam.</div>
 </div>
 
+<div class="card">
+<h2>Offers: Exam Discount</h2>
+<p>Exam select karke offer ON/OFF karein. Original aur offer price set karein; discount percentage automatic calculate hoga.</p>
+<label>Select Exam</label>
+<select id="offerExam"><option value="">Select Exam</option></select>
+<label>Original Price (₹)</label>
+<input id="offerOriginal" type="number" min="0" step="0.01" placeholder="Original price">
+<label>Offer Price (₹)</label>
+<input id="offerPrice" type="number" min="0" step="0.01" placeholder="Discounted price">
+<label>Offer Label</label>
+<input id="offerLabel" value="Special Offer" placeholder="Offer label">
+<label><input type="checkbox" id="offerActive" style="width:auto"> Offer Active</label>
+<p id="offerPreview">Discount preview: —</p>
+<button id="saveOfferBtn">Save Offer</button>
+<button id="clearOfferBtn" class="red">Clear</button>
+<div id="offerList"></div>
+</div>
+
+<div class="card">
+<h2>Combo Packages (One Payment, Multiple Tests)</h2>
+<input type="hidden" id="packageId">
+<label>Package Name</label>
+<input id="packageName" placeholder="e.g. Board Exam Mega Pack">
+<label>Description</label>
+<textarea id="packageDescription" placeholder="Package details"></textarea>
+<label>Original Price (₹)</label>
+<input id="packageOriginal" type="number" min="0" step="0.01" placeholder="Original total">
+<label>Offer Price (₹)</label>
+<input id="packagePrice" type="number" min="0" step="0.01" placeholder="Package offer price">
+<label>Choose Tests Included (multiple select)</label>
+<select id="packageExams" multiple size="6"></select>
+<small>Mobile: select tests using long-press or device's selection method. At least one exam required.</small>
+<label><input type="checkbox" id="packageActive" style="width:auto"> Package Active</label>
+<p id="packagePreview">Discount preview: —</p>
+<button id="savePackageBtn">Save Package</button>
+<button id="clearPackageBtn" class="red">Clear</button>
+<div id="packageList"></div>
+</div>
+
 </div>
 </div>
 
@@ -196,6 +237,9 @@ async function initAdmin(){
         $("adminArea").classList.remove("hidden");
 
         await loadExams();
+        populateOfferAndPackageExamOptions();
+        await loadOffers();
+        await loadPackages();
 
         status("Admin Panel Ready.");
 
@@ -332,6 +376,7 @@ async function loadExams(){
         if(error) throw error;
 
         exams=data || [];
+        populateOfferAndPackageExamOptions();
 
         $("examList").innerHTML="";
 
@@ -650,11 +695,49 @@ async function deleteQuestion(id){
 
 }
 
-/* START */
 
-initAdmin();
+/* OFFERS & COMBO PACKAGES */
+function discountPercent(original, discounted){
+    original=Number(original); discounted=Number(discounted);
+    if(!Number.isFinite(original)||original<=0||discounted<0||discounted>original) return 0;
+    return Math.round((original-discounted)*100/original);
+}
+function previewDiscount(originalId, priceId, previewId){
+    const original=Number($(originalId).value), price=Number($(priceId).value);
+    if($(originalId).value==="" || $(priceId).value==="" || !Number.isFinite(original) || original<=0 || price<0 || price>original){
+        $(previewId).textContent="Discount preview: price values check karein."; return;
+    }
+    const pct=discountPercent(original,price);
+    $(previewId).textContent=`Discount preview: ₹${original.toFixed(2)} → ₹${price.toFixed(2)} (${pct}% OFF)`;
+}
+["offerOriginal","offerPrice"].forEach(id=>$(id).addEventListener("input",()=>previewDiscount("offerOriginal","offerPrice","offerPreview")));
+["packageOriginal","packagePrice"].forEach(id=>$(id).addEventListener("input",()=>previewDiscount("packageOriginal","packagePrice","packagePreview")));
 
-</script>
-
-</body>
-    </html>
+function clearOfferForm(){
+    $("offerExam").value=""; $("offerOriginal").value=""; $("offerPrice").value="";
+    $("offerLabel").value="Special Offer"; $("offerActive").checked=false;
+    $("offerPreview").textContent="Discount preview: —";
+}
+async function saveOffer(){
+    try{
+        const examId=$("offerExam").value, original=Number($("offerOriginal").value), price=Number($("offerPrice").value);
+        if(!examId) throw new Error("Exam select karein.");
+        if($("offerOriginal").value==="" || $("offerPrice").value==="" || !Number.isFinite(original)||!Number.isFinite(price)||original<0||price<0||price>original) throw new Error("Valid price values dein. Offer price original price se zyada nahi ho sakti.");
+        const payload={exam_id:Number(examId),original_price:original,offer_price:price,is_active:$("offerActive").checked,offer_label:$("offerLabel").value.trim()||"Special Offer",updated_at:new Date().toISOString()};
+        status("Saving offer...");
+        const {error}=await supabaseClient.from("exam_offers").upsert(payload,{onConflict:"exam_id"});
+        if(error) throw error;
+        alert("Offer saved!"); clearOfferForm(); await loadOffers(); status("Offer saved successfully.");
+    }catch(e){showError(e);}
+}
+async function loadOffers(){
+    try{
+        const {data,error}=await supabaseClient.from("exam_offers").select("*, exams(id,title)").order("id",{ascending:false});
+        if(error) throw error;
+        const host=$("offerList"); host.innerHTML="";
+        if(!data||!data.length){host.textContent="No offers saved yet.";return;}
+        data.forEach(o=>{
+            const box=document.createElement("div");box.className="item";
+            const heading=document.createElement("h3");heading.textContent=(o.exams?.title||"Exam #"+o.exam_id)+" — "+(o.is_active?"ACTIVE":"OFF");
+            const info=document.createElement("p");
+    
