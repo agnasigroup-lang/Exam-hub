@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>sigmetest Admin</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="./config.js"></script>
+<!-- Supabase and config are loaded by the diagnostic bootstrap below -->
 
 <style>
 *{box-sizing:border-box}
@@ -738,4 +737,5 @@ async function saveOffer(){
         if($("offerOriginal").value==="" || $("offerPrice").value==="" || !Number.isFinite(original)||!Number.isFinite(price)||original<0||price<0||price>original) throw new Error("Valid price values dein. Offer price original price se zyada nahi ho sakti.");
         const payload={exam_id:Number(examId),original_price:original,offer_price:price,is_active:$("offerActive").checked,offer_label:$("offerLabel").value.trim()||"Special Offer",updated_at:new Date().toISOString()};
         status("Saving offer...");
-        const {error}=await supabaseClient.from("exam_offers").up
+        const {error}=await supabaseClient.from("exam_offers").upsert(payload,{onConflict:"exam_id"});
+ 
