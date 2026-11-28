@@ -29,7 +29,7 @@ s.old{color:#94a3b8;margin-right:4px}b.newp{color:#15803d;font-size:18px}
 <body>
 <header><h2>ExamHub Admin</h2><button id="logoutBtn" class="red">Logout</button></header>
 <div class="container">
-<div id="status">HTML loaded. Waiting for admin.js ...</div>
+<div id="status">HTML loaded. Waiting for ADMIN V7 JavaScript...</div>
 <noscript><p style="padding:14px;background:#fee;color:#900">JavaScript is disabled. Enable JavaScript to use the Admin Panel.</p></noscript>
 <div id="adminArea" class="hidden">
 <section class="card">
@@ -102,10 +102,7 @@ s.old{color:#94a3b8;margin-right:4px}b.newp{color:#15803d;font-size:18px}
 </section>
 </div>
 </div>
-<script src="./admin.js?v=7"></script>
-</body>
-</html>
-
+<script>
 document.getElementById("status").textContent="ADMIN V7: SCRIPT EXECUTING";
 window.onerror=function(message,source,line){document.getElementById("status").textContent="JS ERROR: "+message+" (line "+line+")";};
 window.addEventListener("unhandledrejection",function(e){document.getElementById("status").textContent="ASYNC ERROR: "+(e.reason&&e.reason.message||String(e.reason));});
@@ -227,102 +224,4 @@ async function loadQuestions(){
  }catch(e){showError(e);}
 }
 $("questionExam").addEventListener("change",loadQuestions);
-
-/* ================= AUTO QUESTION PARSER ================= */
-function normText(t){return String(t||"").replace(/[\u0966-\u096F]/g,c=>String(c.charCodeAt(0)-0x966)).replace(/\r/g,"").replace(/[\u00a0\t]+/g," ").replace(/ {2,}/g," ");}
-function cleanKey(t){return String(t||"").toLowerCase().replace(/[^\p{L}\p{N}]+/gu," ").trim();}
-function toLetter(c){c=String(c).toUpperCase();return /[1-4]/.test(c)?"ABCD"[Number(c)-1]:c;}
-function splitInline(s){
- const re=/(?:^|\s)\(?([A-Da-d])\s*[\)\.]\s*/g,hits=[];let m;
- while((m=re.exec(s))){hits.push({k:m[1].toUpperCase(),start:m.index,end:re.lastIndex});}
- for(let ai=hits.length-1;ai>=0;ai--){
-  if(hits[ai].k!=="A")continue;
-  const seq=[hits[ai]];let need="B";
-  for(let j=ai+1;j<hits.length&&need<="D";j++){if(hits[j].k===need){seq.push(hits[j]);need=String.fromCharCode(need.charCodeAt(0)+1);}}
-  if(seq.length>=2){const opts={};seq.forEach((h,i)=>{opts[h.k]=s.slice(h.end,i+1<seq.length?seq[i+1].start:s.length).trim();});return {head:s.slice(0,seq[0].start).trim(),opts};}
- }
- return null;
-}
-const RE_QA=/^\s*(?:Q(?:uestion)?|प्रश्न)\.?\s*(\d{1,3})\s*[\.\)\:\-]?\s*(.*)$/i,RE_QB=/^\s*(\d{1,3})\s*[\.\)]\s*(.+)$/;
-const RE_OPT=/^\s*\(?([A-Da-d])\s*[\)\.]\s*(.*)$/,RE_OPTN=/^\s*\(([1-4])\)\s*(.*)$/;
-const RE_ANS=/^\s*(?:Ans(?:wer)?|Correct(?:\s*(?:Answer|Option|Ans))?|Right\s*Answer|उत्तर|सही\s*उत्तर)\s*[:\-\.=]?\s*\(?([A-Da-d1-4])\)?(?![A-Za-z0-9])/i;
-const RE_KEYHEAD=/^\s*(?:answer\s*key|ans\s*key|answers|उत्तर\s*कुंजी|उत्तरमाला)\b\s*[:\-]?\s*(.*)$/i;
-const RE_KEYPAIR=/(\d{1,3})\s*[\.\-:\)\s]\s*\(?([A-Da-d])\)?(?![A-Za-z0-9])/g;
-function parseQuestions(raw){
- const lines=normText(raw).split("\n").map(l=>l.trim()).filter(Boolean);
- const qs=[],key={};let cur=null,last=null,keyMode=false;
- const push=()=>{if(cur)qs.push(cur);cur=null;last=null;};
- const mk=(num,text)=>({num:String(Number(num)),text:(text||"").trim(),opts:{A:"",B:"",C:"",D:""},correct:"",done:false});
- const takeOpt=(q,k,t)=>{let c=false;t=t.replace(/\s*(?:✓|✔|☑|\(correct\)|\(right\)|\*)\s*$/i,()=>{c=true;return "";}).trim();q.opts[k]=t;if(c)q.correct=k;last=k;};
- const takeInline=(q,sp)=>{if(sp.head)q.text=(q.text+" "+sp.head).trim();for(const k of Object.keys(sp.opts))takeOpt(q,k,sp.opts[k]);};
- const addKey=s=>{for(const m of String(s).matchAll(RE_KEYPAIR))key[String(Number(m[1]))]=m[2].toUpperCase();};
- for(const line of lines){
-  if(keyMode){addKey(line);continue;}
-  const kh=line.match(RE_KEYHEAD);if(kh){push();keyMode=true;addKey(kh[1]||"");continue;}
-  if(cur){
-   const am=line.match(RE_ANS);if(am){cur.correct=toLetter(am[1]);cur.done=true;continue;}
-   if(!cur.done){
-    const sp=splitInline(line);if(sp){takeInline(cur,sp);continue;}
-    const om=line.match(RE_OPT)||line.match(RE_OPTN);if(om){takeOpt(cur,toLetter(om[1]),om[2]);continue;}
-   }
-  }
-  const qm=line.match(RE_QA)||line.match(RE_QB);
-  if(qm){push();cur=mk(qm[1],qm[2]);const sp=splitInline(cur.text);if(sp){cur.text="";takeInline(cur,sp);}continue;}
-  if(cur&&!cur.done){if(last)cur.opts[last]=(cur.opts[last]+" "+line).trim();else cur.text=(cur.text+" "+line).trim();}
- }
- push();
- qs.forEach(q=>{if(!q.correct&&key[q.num])q.correct=key[q.num];delete q.done;});
- return qs;
-}
-function validRow(q){return !!(q.text&&q.text.trim()&&["A","B","C","D"].every(k=>(q.opts[k]||"").trim())&&["A","B","C","D"].includes(q.correct)&&Number(q.marks)>0);}
-
-/* ================= SCAN (PDF / IMAGE -> TEXT) ================= */
-function prog(m){$("autoProgress").textContent=m;}
-async function ensureLib(name,url,check){if(check())return;await timeout(loadScript(url),name,60000);if(!check())throw new Error(name+" load nahi hua.");}
-function pdfLines(items){
- const rows=[];items.forEach(it=>{if(!it.str)return;const y=it.transform[5],x=it.transform[4];let r=rows.find(r=>Math.abs(r.y-y)<3);if(!r){r={y,parts:[]};rows.push(r);}r.parts.push({x,s:it.str});});
- rows.sort((a,b)=>b.y-a.y);
- return rows.map(r=>r.parts.sort((a,b)=>a.x-b.x).map(p=>p.s).join(" ").replace(/\s+/g," ").trim()).filter(Boolean).join("\n");
-}
-async function scanFiles(){
- const files=[...$("autoFiles").files];if(!files.length)throw new Error("Pehle PDF ya screenshot choose karein.");
- let out="",worker=null;
- const getWorker=async()=>{if(worker)return worker;prog("OCR engine load ho raha hai (pehli baar thoda time lagta hai)...");await ensureLib("Tesseract",TESS,()=>window.Tesseract);worker=await window.Tesseract.createWorker($("autoLang").value,1,{logger:m=>{if(m.status==="recognizing text")prog("OCR chal raha hai: "+Math.round(m.progress*100)+"%");}});return worker;};
- try{
-  for(let fi=0;fi<files.length;fi++){
-   const f=files[fi],tag=`File ${fi+1}/${files.length}: ${f.name}`;
-   if(f.type==="application/pdf"||/\.pdf$/i.test(f.name)){
-    prog(tag+" - PDF load ho rahi hai...");await ensureLib("pdf.js",PDFJS,()=>window.pdfjsLib);window.pdfjsLib.GlobalWorkerOptions.workerSrc=PDFW;
-    const pdf=await window.pdfjsLib.getDocument({data:new Uint8Array(await f.arrayBuffer())}).promise;const n=Math.min(pdf.numPages,100);
-    for(let p=1;p<=n;p++){
-     prog(`${tag} - page ${p}/${n}`);const page=await pdf.getPage(p);const tc=await page.getTextContent();let txt=pdfLines(tc.items);
-     if(txt.replace(/\s/g,"").length<30){const vp=page.getViewport({scale:2});const cv=document.createElement("canvas");cv.width=vp.width;cv.height=vp.height;await page.render({canvasContext:cv.getContext("2d"),viewport:vp}).promise;const w=await getWorker();const r=await w.recognize(cv);txt=r.data.text;}
-     out+=txt+"\n";
-    }
-   }else if(/^image\//.test(f.type)){
-    prog(tag+" - OCR...");const w=await getWorker();const r=await w.recognize(f);out+=r.data.text+"\n";
-   }else throw new Error("Sirf PDF ya image (JPG/PNG) allowed hai: "+f.name);
-  }
- }finally{if(worker){try{await worker.terminate();}catch(_){}}}
- const ta=$("autoText");ta.value=(ta.value.trim()?ta.value.trim()+"\n":"")+out.trim();
- prog("Scan complete. Text check karke 'Parse Questions' dabayein.");
-}
-$("autoScanBtn").addEventListener("click",async()=>{const b=$("autoScanBtn");try{setBusy(b,true,"Scanning...");await scanFiles();}catch(e){prog("");showError(e);}finally{setBusy(b,false);}});
-
-/* ================= PARSE -> REVIEW -> SAVE ================= */
-async function fetchExisting(examId){const {data,error}=await client.from("questions").select("id,question_text").eq("exam_id",examId);if(error)throw error;const m=new Map();(data||[]).forEach(q=>{const k=cleanKey(q.question_text);if(k&&!m.has(k))m.set(k,q.id);});return m;}
-function renderReview(existing){
- const wrap=$("autoReview");wrap.innerHTML="";$("autoSaveBtn").classList.toggle("hidden",!parsed.length);
- if(!parsed.length)return;
- const upd=$("autoUpdate").checked;
- wrap.appendChild(el("p",null,`${parsed.length} question mile. Galat ya adhoore (laal) questions ko theek karein ya untick karein.`));
- parsed.forEach((q,i)=>{
-  const box=el("div","item rv");const head=el("label","chk");const cb=document.createElement("input");cb.type="checkbox";cb.checked=q.include;cb.addEventListener("change",()=>{q.include=cb.checked;});
-  const match=existing&&existing.get(cleanKey(q.text));head.append(cb,el("b",null,"Q"+q.num+" "),el("span",match&&upd?"pill upd":"pill on",match?(upd?"Update existing":"Duplicate (naya banega)"):"New"));
-  const mark=()=>box.classList.toggle("warn",!validRow(q));
-  const qt=document.createElement("textarea");qt.value=q.text;qt.addEventListener("input",()=>{q.text=qt.value;mark();});
-  const cols=el("div","cols");
-  ["A","B","C","D"].forEach(k=>{const w=el("div");const inp=document.createElement("input");inp.value=q.opts[k];inp.addEventListener("input",()=>{q.opts[k]=inp.value;mark();});w.append(el("label",null,"Option "+k),inp);cols.appendChild(w);});
-  const sel=document.createElement("select");[["","Correct?"],["A","A"],["B","B"],["C","C"],["D","D"]].forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;sel.appendChild(o);});sel.value=q.correct;sel.addEventListener("change",()=>{q.correct=sel.value;mark();});
-  const mk=document.createElement("input");mk.type="number";mk.min="0.01";mk.step="0.01";mk.value=q.marks;mk.addEventListener("input",()=>{q.marks=mk.value;mark();});
-  const w1=el("div");w1.append(el("label",null,"Correct Answer"),sel);const w2=el("div");w2.append(el("label",null,"Marks"),mk);
+ 
