@@ -3,23 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ExamHub Admin V6</title>
+<title>ExamHub Admin V7</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9;color:#1e293b}
 header{background:#172554;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px}
 header h2{margin:0;font-size:20px}.container{max-width:950px;margin:16px auto;padding:12px}
 .card{background:#fff;padding:18px;margin-bottom:18px;border-radius:12px;box-shadow:0 2px 8px #0001}
 label{display:block;margin:10px 0 4px}input,textarea,select{width:100%;padding:11px;margin:6px 0 12px;border:1px solid #cbd5e1;border-radius:7px;font-size:16px;background:#fff;color:#111827}
-textarea{min-height:75px}select[multiple]{min-height:140px}small{display:block;color:#64748b;margin:-6px 0 12px}
+textarea{min-height:75px}small{display:block;color:#64748b;margin:-6px 0 12px}
 button{padding:11px 15px;border:0;border-radius:7px;background:#2563eb;color:white;margin:4px;cursor:pointer;font-size:15px}
-button:disabled{opacity:.6;cursor:wait}.green{background:#15803d}.red{background:#dc2626}.item{border:1px solid #ddd;padding:12px;margin:12px 0;border-radius:8px;overflow-wrap:anywhere}
-#status{background:#fff;padding:12px;margin:12px 0;border-radius:7px;overflow-wrap:anywhere;white-space:pre-wrap}.hidden{display:none}.muted{color:#64748b}
+button:disabled{opacity:.6;cursor:wait}.green{background:#15803d}.red{background:#dc2626}.gray{background:#64748b}
+.item{border:1px solid #ddd;padding:12px;margin:12px 0;border-radius:8px;overflow-wrap:anywhere}.item h3{margin:0 0 6px;font-size:17px}.item p{margin:6px 0}
+#status{position:sticky;top:0;z-index:50;background:#fff;padding:12px;margin:12px 0;border-radius:7px;overflow-wrap:anywhere;white-space:pre-wrap;box-shadow:0 2px 8px #0002}
+.hidden{display:none}.muted{color:#64748b}
+.chk{display:flex!important;align-items:center;gap:8px;margin:6px 0}.chk input{width:auto;margin:0}
+.box{max-height:220px;overflow:auto;border:1px solid #cbd5e1;border-radius:7px;padding:6px 10px;margin-bottom:12px}
+s.old{color:#94a3b8;margin-right:4px}b.newp{color:#15803d;font-size:18px}
+.badge{background:#dc2626;color:#fff;padding:2px 8px;border-radius:12px;font-size:13px;font-weight:bold}
+.tag{background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:12px;font-size:13px}
+.pill{padding:2px 9px;border-radius:12px;font-size:12px;color:#fff;font-weight:bold;vertical-align:middle}.pill.on{background:#15803d}.pill.off{background:#94a3b8}.pill.upd{background:#d97706}
+.warn{border-color:#dc2626;background:#fef2f2}.rv label{margin:4px 0 0;font-size:13px;color:#64748b}.rv input,.rv textarea,.rv select{margin:2px 0 6px;padding:8px;font-size:15px}
+.rv .cols{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}@media(max-width:560px){.rv .cols{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header><h2>ExamHub Admin</h2><button id="logoutBtn" class="red">Logout</button></header>
 <div class="container">
-<div id="status">HTML loaded. Waiting for ADMIN V6 JavaScript...</div>
+<div id="status">HTML loaded. Waiting for ADMIN V7 JavaScript...</div>
 <noscript><p style="padding:14px;background:#fee;color:#900">JavaScript is disabled. Enable JavaScript to use the Admin Panel.</p></noscript>
 <div id="adminArea" class="hidden">
 <section class="card">
@@ -31,11 +41,12 @@ button:disabled{opacity:.6;cursor:wait}.green{background:#15803d}.red{background
 <label>Subject</label><input id="examSubject" placeholder="Subject">
 <label>Exam Fee (₹)</label><input id="examFee" type="number" min="0" step="0.01" value="0">
 <label>Exam Duration (Minutes)</label><input id="examDuration" type="number" min="1" max="300" value="30">
-<label><input type="checkbox" id="examPublished" style="width:auto"> Publish Exam</label>
+<label class="chk"><input type="checkbox" id="examPublished"> Publish Exam</label>
 <button id="saveExamBtn">Save Exam</button><button id="clearExamBtn" class="red">Clear Form</button>
 </section>
 <section class="card"><h2>All Exams</h2><div id="examList">Loading exams...</div></section>
-<section class="card">
+
+<section class="card" id="questionCard">
 <h2>Add / Edit Question</h2><input type="hidden" id="questionId">
 <label>Select Exam</label><select id="questionExam"><option value="">Select Exam</option></select>
 <label>Question</label><textarea id="questionText"></textarea>
@@ -45,59 +56,89 @@ button:disabled{opacity:.6;cursor:wait}.green{background:#15803d}.red{background
 <label>Marks</label><input id="questionMarks" type="number" min="1" step="0.01" value="1">
 <button id="saveQuestionBtn">Save Question</button><button id="clearQuestionBtn" class="red">Clear Question</button>
 </section>
+
+<section class="card" id="autoCard">
+<h2>🤖 Auto Add Questions (PDF / Screenshot)</h2>
+<p class="muted">Steps: Exam select karein → PDF/screenshot choose karein → <b>Scan</b> → text check/edit karein → <b>Parse</b> → questions review karein → <b>Save</b>. Same question pehle se ho to wo update ho jayega.</p>
+<label>Select Exam</label><select id="autoExam"><option value="">Select Exam</option></select>
+<label>PDF / Screenshots (ek saath kai files)</label><input type="file" id="autoFiles" accept="application/pdf,image/*" multiple>
+<label>OCR Language (sirf image / scanned PDF ke liye)</label><select id="autoLang"><option value="eng">English</option><option value="hin+eng">Hindi + English</option></select>
+<label>Default Marks (har question)</label><input id="autoMarks" type="number" min="1" step="0.01" value="1">
+<button id="autoScanBtn">1. Scan Files</button>
+<div id="autoProgress" class="muted"></div>
+<label>Extracted Text (edit kar sakte hain, ya seedha paste karein)</label>
+<textarea id="autoText" style="min-height:170px" placeholder="1. Question?&#10;A) option  B) option  C) option  D) option&#10;Ans: B&#10;&#10;(ya end me)  Answer Key: 1-A, 2-C, 3-B"></textarea>
+<small>Question number (1. / Q1.), options (A) B) C) D)) aur "Ans: B" ya last me "Answer Key" hona chahiye.</small>
+<label class="chk"><input type="checkbox" id="autoUpdate" checked> Same question mile to update karein (duplicate na bane)</label>
+<button id="autoParseBtn">2. Parse Questions</button>
+<div id="autoReview"></div>
+<button id="autoSaveBtn" class="green hidden">3. Save Selected Questions</button>
+</section>
+
 <section class="card"><h2>All Questions</h2><div id="questionList">Select an Exam.</div></section>
-<section class="card">
-<h2>Offers: Exam Discount</h2><p>Exam select karke offer ON/OFF karein. Original aur offer price set karein.</p>
+
+<section class="card" id="offerCard">
+<h2>Offers: Exam Discount</h2><p class="muted">Exam select karein, offer price likhein. Purani price kat kar nayi price aur % OFF tag dikhega. ON/OFF button se offer chalu ya band karein.</p>
 <label>Select Exam</label><select id="offerExam"><option value="">Select Exam</option></select>
-<label>Original Price (₹)</label><input id="offerOriginal" type="number" min="0" step="0.01" placeholder="Original price">
-<label>Offer Price (₹)</label><input id="offerPrice" type="number" min="0" step="0.01" placeholder="Discounted price">
-<label>Offer Label</label><input id="offerLabel" value="Special Offer">
-<label><input type="checkbox" id="offerActive" style="width:auto"> Offer Active</label>
-<p id="offerPreview">Discount preview: —</p><button id="saveOfferBtn">Save Offer</button><button id="clearOfferBtn" class="red">Clear</button>
+<label>Original Price (₹) — kat kar dikhegi</label><input id="offerOriginal" type="number" min="0" step="0.01" placeholder="Original price">
+<label>Offer Price (₹) — nayi price</label><input id="offerPrice" type="number" min="0" step="0.01" placeholder="Discounted price">
+<label>Offer Tag Label</label><input id="offerLabel" value="Special Offer">
+<label class="chk"><input type="checkbox" id="offerActive"> Offer Active (ON)</label>
+<p id="offerPreview">Preview: —</p><button id="saveOfferBtn">Save Offer</button><button id="clearOfferBtn" class="red">Clear</button>
 <div id="offerList"></div>
 </section>
-<section class="card">
-<h2>Combo Packages (One Payment, Multiple Tests)</h2><input type="hidden" id="packageId">
+
+<section class="card" id="packageCard">
+<h2>Combo Packages (ek payment, kai tests)</h2><input type="hidden" id="packageId">
 <label>Package Name</label><input id="packageName" placeholder="e.g. Board Exam Mega Pack">
 <label>Description</label><textarea id="packageDescription" placeholder="Package details"></textarea>
-<label>Original Price (₹)</label><input id="packageOriginal" type="number" min="0" step="0.01" placeholder="Original total">
-<label>Offer Price (₹)</label><input id="packagePrice" type="number" min="0" step="0.01" placeholder="Package offer price">
-<label>Choose Tests Included (multiple select)</label><select id="packageExams" multiple size="6"></select>
-<small>Select multiple exams. At least one exam is required.</small>
-<label><input type="checkbox" id="packageActive" style="width:auto"> Package Active</label>
-<p id="packagePreview">Discount preview: —</p><button id="savePackageBtn">Save Package</button><button id="clearPackageBtn" class="red">Clear</button>
+<label>Tests Included (kam se kam 1 select karein)</label><div id="packageExamList" class="box"></div>
+<button id="packageAutoBtn" class="gray">Selected tests ki fee jod kar Original Price bharein</button>
+<label>Original Price (₹) — kat kar dikhegi</label><input id="packageOriginal" type="number" min="0" step="0.01" placeholder="Original total">
+<label>Package Offer Price (₹)</label><input id="packagePrice" type="number" min="0" step="0.01" placeholder="Package offer price">
+<label class="chk"><input type="checkbox" id="packageActive"> Package Active (ON)</label>
+<p id="packagePreview">Preview: —</p><button id="savePackageBtn">Save Package</button><button id="clearPackageBtn" class="red">Clear</button>
 <div id="packageList"></div>
 </section>
 </div>
 </div>
 <script>
-document.getElementById("status").textContent="ADMIN V6: SCRIPT EXECUTING";
+document.getElementById("status").textContent="ADMIN V7: SCRIPT EXECUTING";
 window.onerror=function(message,source,line){document.getElementById("status").textContent="JS ERROR: "+message+" (line "+line+")";};
 window.addEventListener("unhandledrejection",function(e){document.getElementById("status").textContent="ASYNC ERROR: "+(e.reason&&e.reason.message||String(e.reason));});
 (function(){
 "use strict";
 const $=id=>document.getElementById(id);
-let client=null, exams=[], offers=[], packages=[], currentUser=null;
-function setStatus(msg){const el=$("status");if(el)el.textContent=msg;}
-function showError(err){console.error("ExamHub Admin:",err);setStatus("ERROR: "+(err?.message||String(err)));}
+let client=null,exams=[],offers=[],packages=[],pkgLinks=[],currentUser=null,parsed=[];
+const TESS="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";
+const PDFJS="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+const PDFW="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+function setStatus(m){const e=$("status");if(e)e.textContent=m;}
+function showError(err){console.error("ExamHub Admin:",err);setStatus("ERROR: "+(err&&err.message||String(err)));}
 function timeout(p,label,ms=15000){return Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error(label+" timed out. Internet/config check karein.")),ms))]);}
-function loadScript(src){return new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=()=>reject(new Error("Script load nahi hua: "+src));document.head.appendChild(s);});}
-function examName(id){return exams.find(e=>String(e.id)===String(id))?.title||("Exam #"+id);}
-function safeText(el,text){el.textContent=text==null?"":String(text);}
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement("script");s.src=src;s.onload=res;s.onerror=()=>rej(new Error("Script load nahi hua: "+src));document.head.appendChild(s);});}
+function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
+function btn(text,cls,fn){const b=el("button",cls,text);b.addEventListener("click",async()=>{b.disabled=true;try{await fn();}catch(e){showError(e);}finally{b.disabled=false;}});return b;}
+function idv(v){return /^\d+$/.test(String(v))?Number(v):v;}
+function examName(id){const e=exams.find(x=>String(x.id)===String(id));return e?e.title:("Exam #"+id);}
 function money(n){return "₹"+Number(n||0).toFixed(2);}
 function discountPercent(o,p){o=Number(o);p=Number(p);return o>0&&p>=0&&p<=o?Math.round((o-p)*100/o):0;}
-function previewDiscount(oId,pId,outId){const o=$(oId).value,p=$(pId).value;if(o===""||p===""){safeText($(outId),"Discount preview: —");return;}const a=Number(o),b=Number(p);if(!Number.isFinite(a)||!Number.isFinite(b)||a<=0||b<0||b>a){safeText($(outId),"Discount preview: price values check karein.");return;}safeText($(outId),`Discount preview: ${money(a)} → ${money(b)} (${discountPercent(a,b)}% OFF)`);}
-function setBusy(btn,busy,label){if(!btn)return;btn.disabled=busy;if(busy)btn.dataset.oldLabel=btn.textContent;btn.textContent=busy?label:(btn.dataset.oldLabel||btn.textContent);if(!busy)delete btn.dataset.oldLabel;}
-async function requireResult(result){if(result.error)throw result.error;return result.data;}
+function priceView(o,p,label){const s=el("span");s.append(el("s","old",money(o))," ",el("b","newp",money(p))," ");const d=discountPercent(o,p);if(d>0)s.append(el("span","badge",d+"% OFF"));if(label)s.append(" ",el("span","tag",label));return s;}
+function previewPrice(oId,pId,outId){const out=$(outId),o=$(oId).value,p=$(pId).value;out.textContent="";if(o===""||p===""){out.textContent="Preview: —";return;}const a=Number(o),b=Number(p);if(!Number.isFinite(a)||!Number.isFinite(b)||a<=0||b<0||b>a){out.textContent="Preview: price check karein (offer price original se zyada nahi hona chahiye).";return;}out.append("Preview: ",priceView(a,b));}
+function setBusy(b,busy,label){if(!b)return;b.disabled=busy;if(busy){b.dataset.oldLabel=b.textContent;b.textContent=label;}else{b.textContent=b.dataset.oldLabel||b.textContent;delete b.dataset.oldLabel;}}
+function validPrices(o,p){if(o===""||p==="")return false;o=Number(o);p=Number(p);return Number.isFinite(o)&&Number.isFinite(p)&&o>0&&p>=0&&p<=o;}
+function jump(id){const e=$(id);if(e)e.scrollIntoView({behavior:"smooth",block:"start"});}
+
+/* ================= BOOT ================= */
 async function boot(){
  try{
   setStatus("Loading Supabase library...");
   if(!window.supabase)await timeout(loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"),"Supabase library");
-  if(!window.supabase?.createClient)throw new Error("Supabase library global unavailable.");
+  if(!window.supabase||!window.supabase.createClient)throw new Error("Supabase library global unavailable.");
   setStatus("Supabase library loaded. Loading config.js...");
-  await timeout(loadScript("./config.js?v=admin-v6-20261127"),"config.js");
-  if(typeof window.supabaseClient!=="undefined") client=window.supabaseClient; else if(typeof supabaseClient!=="undefined") client=supabaseClient; else throw new Error("config.js must create client.");
-  // config.js commonly declares const supabaseClient in its own script; read it through window if it exposes it.
+  await timeout(loadScript("./config.js?v=admin-v7"),"config.js");
+  if(typeof window.supabaseClient!=="undefined")client=window.supabaseClient;
+  else if(typeof supabaseClient!=="undefined")client=supabaseClient;
   if(!client)throw new Error("config.js load hua lekin client accessible nahi. config.js mein supabaseClient create karein.");
   await initAdmin();
  }catch(e){showError(e);}
@@ -114,9 +155,7 @@ async function initAdmin(){
   if(!profile||profile.role!=="admin")throw new Error("Is account ka admin role nahi hai.");
   $("adminArea").classList.remove("hidden");
   setStatus("Loading exams...");
-  await loadExams();
-  await loadOffers();
-  await loadPackages();
+  await loadExams();await loadOffers();await loadPackages();
   setStatus("Admin Panel Ready.");
  }catch(e){showError(e);}
 }
@@ -124,7 +163,9 @@ $("logoutBtn").addEventListener("click",async()=>{
  try{setBusy($("logoutBtn"),true,"Logging out...");if(!client)throw new Error("Supabase client not ready.");const {error}=await timeout(client.auth.signOut(),"Logout");if(error)throw error;location.replace("./login.html");}
  catch(e){showError(e);setBusy($("logoutBtn"),false);}
 });
-function clearExamForm(){ $("examId").value="";$("examTitle").value="";$("examDescription").value="";$("examClass").value="";$("examSubject").value="";$("examFee").value="0";$("examDuration").value="30";$("examPublished").checked=false;$("saveExamBtn").textContent="Save Exam";}
+
+/* ================= EXAMS ================= */
+function clearExamForm(){$("examId").value="";$("examTitle").value="";$("examDescription").value="";$("examClass").value="";$("examSubject").value="";$("examFee").value="0";$("examDuration").value="30";$("examPublished").checked=false;$("saveExamBtn").textContent="Save Exam";}
 async function saveExam(){
  try{
   const title=$("examTitle").value.trim(),fee=Number($("examFee").value),duration=Number($("examDuration").value);
@@ -136,28 +177,36 @@ async function saveExam(){
  }catch(e){showError(e);}
 }
 $("saveExamBtn").addEventListener("click",saveExam);$("clearExamBtn").addEventListener("click",clearExamForm);
+function getChecked(){return [...document.querySelectorAll("#packageExamList input:checked")].map(i=>i.value);}
+function renderPackageExamList(sel){
+ const box=$("packageExamList");box.innerHTML="";
+ if(!exams.length){box.textContent="Pehle exams add karein.";return;}
+ exams.forEach(ex=>{const lb=el("label","chk");const cb=document.createElement("input");cb.type="checkbox";cb.value=ex.id;cb.checked=sel.includes(String(ex.id));cb.addEventListener("change",()=>previewPrice("packageOriginal","packagePrice","packagePreview"));lb.append(cb,document.createTextNode(ex.title+" ("+money(ex.fee)+")"));box.appendChild(lb);});
+}
 async function loadExams(){
  try{
   const {data,error}=await client.from("exams").select("id,title,description,class_name,subject,fee,duration_minutes,is_published").order("id",{ascending:false});if(error)throw error;
-  exams=data||[];["questionExam","offerExam"].forEach(id=>{$(id).innerHTML='<option value="">Select Exam</option>';});
-  $("packageExams").innerHTML="";
-  exams.forEach(ex=>{for(const sid of ["questionExam","offerExam"]){const op=document.createElement("option");op.value=ex.id;op.textContent=ex.title;$(sid).appendChild(op);}const po=document.createElement("option");po.value=ex.id;po.textContent=ex.title;$("packageExams").appendChild(po);});
+  exams=data||[];
+  for(const sid of ["questionExam","offerExam","autoExam"]){const s=$(sid),keep=s.value;s.innerHTML='<option value="">Select Exam</option>';exams.forEach(ex=>{const op=document.createElement("option");op.value=ex.id;op.textContent=ex.title;s.appendChild(op);});if(keep&&exams.some(e=>String(e.id)===keep))s.value=keep;}
+  renderPackageExamList(getChecked());
   const list=$("examList");list.innerHTML="";
   if(!exams.length){list.textContent="No exams yet.";return;}
   exams.forEach(ex=>{
-   const box=document.createElement("div");box.className="item";const h=document.createElement("h3");h.textContent=ex.title;const p=document.createElement("p");p.textContent=`Class: ${ex.class_name||"-"} | Subject: ${ex.subject||"-"} | Fee: ${money(ex.fee)} | Timer: ${ex.duration_minutes||30} min | ${ex.is_published?"Published":"Unpublished"}`;
-   const edit=document.createElement("button");edit.textContent="Edit";edit.onclick=()=>{ $("examId").value=ex.id;$("examTitle").value=ex.title||"";$("examDescription").value=ex.description||"";$("examClass").value=ex.class_name||"";$("examSubject").value=ex.subject||"";$("examFee").value=ex.fee??0;$("examDuration").value=ex.duration_minutes??30;$("examPublished").checked=!!ex.is_published;$("saveExamBtn").textContent="Update Exam";window.scrollTo({top:0,behavior:"smooth"});};
-   const toggle=document.createElement("button");toggle.textContent=ex.is_published?"Unpublish":"Publish";toggle.className=ex.is_published?"red":"green";toggle.onclick=async()=>{try{const {error}=await client.from("exams").update({is_published:!ex.is_published}).eq("id",ex.id);if(error)throw error;await loadExams();}catch(e){showError(e);}};
-   box.append(h,p,edit,toggle);list.appendChild(box);
+   const box=el("div","item");box.append(el("h3",null,ex.title),el("p",null,`Class: ${ex.class_name||"-"} | Subject: ${ex.subject||"-"} | Fee: ${money(ex.fee)} | Timer: ${ex.duration_minutes||30} min | ${ex.is_published?"Published":"Unpublished"}`));
+   const edit=btn("Edit",null,()=>{$("examId").value=ex.id;$("examTitle").value=ex.title||"";$("examDescription").value=ex.description||"";$("examClass").value=ex.class_name||"";$("examSubject").value=ex.subject||"";$("examFee").value=ex.fee??0;$("examDuration").value=ex.duration_minutes??30;$("examPublished").checked=!!ex.is_published;$("saveExamBtn").textContent="Update Exam";window.scrollTo({top:0,behavior:"smooth"});});
+   const tg=btn(ex.is_published?"Unpublish":"Publish",ex.is_published?"red":"green",async()=>{const {error}=await client.from("exams").update({is_published:!ex.is_published}).eq("id",ex.id);if(error)throw error;await loadExams();});
+   box.append(edit,tg);list.appendChild(box);
   });
  }catch(e){showError(e);}
 }
-function clearQuestionForm(){ $("questionId").value="";$("questionText").value="";["optionA","optionB","optionC","optionD"].forEach(id=>$(id).value="");$("correctOption").value="";$("questionMarks").value="1";$("saveQuestionBtn").textContent="Save Question";}
+
+/* ================= QUESTIONS (manual) ================= */
+function clearQuestionForm(){$("questionId").value="";$("questionText").value="";["optionA","optionB","optionC","optionD"].forEach(id=>$(id).value="");$("correctOption").value="";$("questionMarks").value="1";$("saveQuestionBtn").textContent="Save Question";}
 async function saveQuestion(){
  try{
   const examId=$("questionExam").value,qText=$("questionText").value.trim(),opts=["optionA","optionB","optionC","optionD"].map(id=>$(id).value.trim()),correct=$("correctOption").value,marks=Number($("questionMarks").value);
-  if(!examId)throw new Error("Exam select karein.");if(!qText)throw new Error("Question likhein.");if(opts.some(x=>!x))throw new Error("Charo options bharein.");if(!["A","B","C","D"].includes(correct))throw new Error("Correct answer choose karein.");if(!Number.isFinite(marks)||marks<1)throw new Error("Marks valid enter karein.");
-  const row={exam_id:examId,question_text:qText,option_a:opts[0],option_b:opts[1],option_c:opts[2],option_d:opts[3],correct_option:correct,marks};
+  if(!examId)throw new Error("Exam select karein.");if(!qText)throw new Error("Question likhein.");if(opts.some(x=>!x))throw new Error("Charo options bharein.");if(!["A","B","C","D"].includes(correct))throw new Error("Correct answer choose karein.");if(!Number.isFinite(marks)||marks<=0)throw new Error("Marks valid enter karein.");
+  const row={exam_id:idv(examId),question_text:qText,option_a:opts[0],option_b:opts[1],option_c:opts[2],option_d:opts[3],correct_option:correct,marks};
   const id=$("questionId").value;setStatus("Saving question...");const r=id?await client.from("questions").update(row).eq("id",id):await client.from("questions").insert(row);if(r.error)throw r.error;
   clearQuestionForm();await loadQuestions();setStatus("Question saved.");
  }catch(e){showError(e);}
@@ -165,34 +214,14 @@ async function saveQuestion(){
 $("saveQuestionBtn").addEventListener("click",saveQuestion);$("clearQuestionBtn").addEventListener("click",clearQuestionForm);
 async function loadQuestions(){
  try{
-  const examId=$("questionExam").value;const list=$("questionList");if(!examId){list.textContent="Select an Exam.";return;}
+  const examId=$("questionExam").value,list=$("questionList");if(!examId){list.textContent="Select an Exam.";return;}
   const {data,error}=await client.from("questions").select("*").eq("exam_id",examId).order("id",{ascending:true});if(error)throw error;
-  list.innerHTML="";if(!data?.length){list.textContent="No questions for this exam yet.";return;}
-  data.forEach((q,i)=>{const box=document.createElement("div");box.className="item";const h=document.createElement("h3");h.textContent=`${i+1}. ${q.question_text}`;const p=document.createElement("p");p.textContent=`A: ${q.option_a} | B: ${q.option_b} | C: ${q.option_c} | D: ${q.option_d} | Correct: ${q.correct_option} | Marks: ${q.marks}`;
-   const edit=document.createElement("button");edit.textContent="Edit";edit.onclick=()=>{$("questionId").value=q.id;$("questionText").value=q.question_text||"";$("optionA").value=q.option_a||"";$("optionB").value=q.option_b||"";$("optionC").value=q.option_c||"";$("optionD").value=q.option_d||"";$("correctOption").value=q.correct_option||"";$("questionMarks").value=q.marks??1;$("saveQuestionBtn").textContent="Update Question";window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});};
-   const del=document.createElement("button");del.textContent="Delete";del.className="red";del.onclick=async()=>{if(!confirm("Question delete karna hai?"))return;try{const {error}=await client.from("questions").delete().eq("id",q.id);if(error)throw error;await loadQuestions();}catch(e){showError(e);}};
-   box.append(h,p,edit,del);list.appendChild(box);});
- }catch(e){showError(e);}
-}
-$("questionExam").addEventListener("change",loadQuestions);
-async function loadOffers(){
- try{
-  const {data,error}=await client.from("exam_offers").select("*").order("updated_at",{ascending:false});if(error)throw error;offers=data||[];
-  const list=$("offerList");list.innerHTML="";if(!offers.length){list.textContent="No offers saved.";return;}
-  offers.forEach(o=>{const box=document.createElement("div");box.className="item";box.textContent=`${examName(o.exam_id)} | ${money(o.original_price)} → ${money(o.offer_price)} | ${discountPercent(o.original_price,o.offer_price)}% off | ${o.is_active?"Active":"Inactive"} | ${o.offer_label||""}`;
-   const edit=document.createElement("button");edit.textContent="Edit";edit.onclick=()=>{$("offerExam").value=o.exam_id;$("offerOriginal").value=o.original_price;$("offerPrice").value=o.offer_price;$("offerLabel").value=o.offer_label||"Special Offer";$("offerActive").checked=!!o.is_active;previewDiscount("offerOriginal","offerPrice","offerPreview");window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});};
-   const del=document.createElement("button");del.textContent="Delete";del.className="red";del.onclick=async()=>{if(!confirm("Offer delete karein?"))return;try{const {error}=await client.from("exam_offers").delete().eq("exam_id",o.exam_id);if(error)throw error;await loadOffers();}catch(e){showError(e);}};
+  list.innerHTML="";if(!data||!data.length){list.textContent="No questions for this exam yet.";return;}
+  data.forEach((q,i)=>{const box=el("div","item");box.append(el("h3",null,`${i+1}. ${q.question_text}`),el("p",null,`A: ${q.option_a} | B: ${q.option_b} | C: ${q.option_c} | D: ${q.option_d} | Correct: ${q.correct_option} | Marks: ${q.marks}`));
+   const edit=btn("Edit",null,()=>{$("questionId").value=q.id;$("questionText").value=q.question_text||"";$("optionA").value=q.option_a||"";$("optionB").value=q.option_b||"";$("optionC").value=q.option_c||"";$("optionD").value=q.option_d||"";$("correctOption").value=q.correct_option||"";$("questionMarks").value=q.marks??1;$("saveQuestionBtn").textContent="Update Question";jump("questionCard");});
+   const del=btn("Delete","red",async()=>{if(!confirm("Question delete karna hai?"))return;const {error}=await client.from("questions").delete().eq("id",q.id);if(error)throw error;await loadQuestions();});
    box.append(edit,del);list.appendChild(box);});
  }catch(e){showError(e);}
 }
-function clearOffer(){ $("offerExam").value="";$("offerOriginal").value="";$("offerPrice").value="";$("offerLabel").value="Special Offer";$("offerActive").checked=false;$("offerPreview").textContent="Discount preview: —";}
-$("offerOriginal").addEventListener("input",()=>previewDiscount("offerOriginal","offerPrice","offerPreview"));$("offerPrice").addEventListener("input",()=>previewDiscount("offerOriginal","offerPrice","offerPreview"));
-$("clearOfferBtn").addEventListener("click",clearOffer);
-$("saveOfferBtn").addEventListener("click",async()=>{
- try{const examId=$("offerExam").value,original=Number($("offerOriginal").value),price=Number($("offerPrice").value);if(!examId)throw new Error("Exam select karein.");if($("offerOriginal").value===""||$("offerPrice").value===""||!Number.isFinite(original)||!Number.isFinite(price)||original<=0||price<0||price>original)throw new Error("Prices valid honi chahiye; offer price original se zyada nahi.");const row={exam_id:examId,original_price:original,offer_price:price,is_active:$("offerActive").checked,offer_label:$("offerLabel").value.trim()||"Special Offer",updated_at:new Date().toISOString()};const {error}=await client.from("exam_offers").upsert(row,{onConflict:"exam_id"});if(error)throw error;clearOffer();await loadOffers();setStatus("Offer saved.");}catch(e){showError(e);}
-});
-async function loadPackages(){
- try{
-  const {data,error}=await client.from("combo_packages").select("*").order("id",{ascending:false});if(error)throw error;packages=data||[];const list=$("packageList");list.innerHTML="";if(!packages.length){list.textContent="No combo packages saved.";return;}
-  for(const pkg of packages){const {data:links,error:le}=await client.from("combo_package_exams").select("exam_id").eq("package_id",pkg.id);if(le)throw le;const ids=(links||[]).map(x=>x.exam_id);const names=ids.map(examName).join(", ");const box=document.createElement("div");box.className="item";box.textContent=`${pkg.name} | ${money(pkg.original_price)} → ${money(pkg.offer_price)} | ${discountPercent(pkg.original_price,pkg.offer_price)}% off | ${pkg.is_active?"Active":"Inactive"} | Tests: ${names}`;
-   const edit=document.createElement("button");edit.textContent="Edit";edit.onclick=()=>{$("packageId").value=pkg.id;$("packageName").value=pkg.name||"";$("packageDescription").value=pkg.description||"";$("packageOriginal").value=pkg.original_price;$("packagePrice").value=pkg.offer_
+$("questionExam").addEventListener("change",loadQuestions);
+ 
