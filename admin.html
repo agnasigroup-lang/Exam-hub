@@ -10,7 +10,7 @@
 <body>
 <header><h2>ExamHub Admin</h2><button id="logoutBtn" class="red">Logout</button></header>
 <main class="container">
-<div id="status" class="status">HTML loaded. Waiting for JavaScript…</div>
+<div id="status" class="status">HTML loaded. JS startup check pending…</div>
 <noscript><p style="background:#fee;color:#900;padding:12px">JavaScript enable karein.</p></noscript>
 <div id="adminArea" class="hidden">
 <section class="card"><h2>Add / Edit Exam</h2><input id="examId" type="hidden">
@@ -73,4 +73,4 @@ async function loadOffers(){let {data,error}=await client.from('exam_offers').se
 // Combo packages
 function clearPackage(){ $('packageId').value='';$('packageName').value='';$('packageDescription').value='';renderPackageExamList();$('packageOriginal').value='';$('packagePrice').value='';$('packageActive').checked=false;$('packagePreview').textContent='Preview: —';}
 $('packageAutoBtn').onclick=()=>{let total=exams.filter(e=>selectedPackageIds().includes(String(e.id))).reduce((sum,e)=>sum+Number(e.fee||0),0);$('packageOriginal').value=total.toFixed(2);preview('packageOriginal','packagePrice','packagePreview');};$('packageOriginal').oninput=()=>preview('packageOriginal','packagePrice','packagePreview');$('packagePrice').oninput=()=>preview('packageOriginal','packagePrice','packagePreview');$('clearPackageBtn').onclick=clearPackage;
-async function savePackage(){let name=$('packageName').value.trim(),ids=selectedPackageIds(),orig=$('packageOriginal').value,price=$('packagePrice').value;if(!name||ids.length<2||orig===''||price===''||Number(orig)<=0||Number(price)<0||Number(price)>Number(orig))throw Error('Package name, kam se kam
+async function savePackage(){let name=$('packageName').value.trim(),ids=selectedPackageIds(),orig=$('packageOriginal').value,price=$('packagePrice').value;if(!name||ids.length<2||orig===''||price===''||Number(orig)<=0||Number(price)<0||Number(price)>Number(orig))throw Error('Package name, kam se k
